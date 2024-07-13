@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { UpdateClass, DeleteClass } from '@/app/ui/classes/buttons';
-import { formatDateToLocal } from '@/app/lib/utils';
+import {formatDateToLocal, formatDateToLocalFrance} from '@/app/lib/utils';
 import { fetchFilteredClasses } from '@/app/lib/data';
 
 export default async function ClassesTable({
@@ -26,7 +26,10 @@ export default async function ClassesTable({
                   <div>
                     <div className="mb-2">
                       <p><b>{classItem.nom_de_la_classe}</b></p>
-                      <p>{formatDateToLocal(classItem.date_et_heure)}</p>
+                      <p>{formatDateToLocalFrance(classItem.date_et_heure)}</p>
+                    </div>
+                    <div className="mb-2">
+                      <p><i>{classItem.nombre_de_places_disponibles} places disponibles</i></p>
                     </div>
                   </div>
                   <div className="flex justify-end gap-2">
@@ -50,8 +53,8 @@ export default async function ClassesTable({
                 <th scope="col" className="px-3 py-5 font-medium">
                   Places
                 </th>
-                <th scope="col" className="relative py-3 pl-6 pr-3">
-                  <span className="sr-only">Edit</span>
+                <th scope="col" className="px-3 py-5 font-medium">
+                  <div className="flex justify-end gap-3"><p>Book/Cancel</p></div>
                 </th>
               </tr>
             </thead>
@@ -67,10 +70,10 @@ export default async function ClassesTable({
                     </div>
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    {classItem.type_id}
+                    {classItem.type}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    {formatDateToLocal(classItem.date_et_heure)}
+                    {formatDateToLocalFrance(classItem.date_et_heure)}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
                     {classItem.nombre_de_places_disponibles}

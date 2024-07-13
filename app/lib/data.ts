@@ -242,7 +242,7 @@ export async function fetchClassesPages(query: string) {
     try {
         const count = await sql`SELECT COUNT(*)
                                 FROM classe
-                                JOIN classetype ON classe.type_id = classetype.id
+                                         JOIN classetype ON classe.type_id = classetype.id
                                 WHERE nom_de_la_classe ILIKE ${`%${query}%`}
                                    OR
                                     date_et_heure ::text ILIKE ${`%${query}%`}
@@ -262,18 +262,20 @@ export async function fetchFilteredClasses(query: string, currentPage: number) {
 
     try {
         const classes = await sql<Classes>`
-            SELECT id,
-                   nom_de_la_classe,
-                   date_et_heure,
-                   type_id,
-                   nombre_de_places_disponibles
-            FROM classe
-            WHERE
-                nom_de_la_classe ILIKE ${`%${query}%`}
-                OR
-                date_et_heure::text ILIKE ${`%${query}%`}
+            SELECT c.id,
+                   c.nom_de_la_classe,
+                   c.date_et_heure,
+                   ct.type_name as type,
+                   c.nombre_de_places_disponibles
+            FROM classe c
+                     JOIN classetype ct ON c.type_id = ct.id
+            WHERE c.nom_de_la_classe ILIKE ${`%${query}%`}
+               OR
+                c.date_et_heure::text ILIKE ${`%${query}%`}
+               OR
+                ct.type_name ILIKE ${`%${query}%`}
             ORDER BY date_et_heure ASC
-            LIMIT ${ITEMS_PER_PAGE}
+                LIMIT ${ITEMS_PER_PAGE}
             OFFSET ${offset}
         `;
 
