@@ -1,7 +1,7 @@
 'use client';
 
 import {
-    UserGroupIcon,
+    BookmarkIcon,
     HomeIcon,
     DocumentDuplicateIcon,
     CalendarIcon,
@@ -15,6 +15,7 @@ import clsx from "clsx";
 const links = [
     {name: 'Home', href: '/dashboard', icon: HomeIcon},
     {name: 'Classes', href: '/dashboard/classes', icon: CalendarIcon},
+    {name: 'Attendees', href: '/dashboard/attendees', icon: BookmarkIcon},
     {
         name: 'Invoices',
         href: '/dashboard/invoices',

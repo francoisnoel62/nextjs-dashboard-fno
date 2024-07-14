@@ -221,3 +221,19 @@ export async function updateClass(id: string, formData: FormData) {
     revalidatePath('/dashboard/classes');
     redirect('/dashboard/classes');
 }
+
+export async function deleteAttendee(id: string) {
+
+    try {
+        await sql`
+            DELETE FROM attendees
+            WHERE id = ${id}
+        `;
+        revalidatePath('/dashboard/attendees');
+        return { message: 'Attendee deleted successfully' };
+    } catch (e) {
+        return {
+            message: 'An error occurred while deleting the attendee',
+        }
+    }
+}

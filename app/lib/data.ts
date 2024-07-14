@@ -7,7 +7,7 @@ import {
     LatestInvoiceRaw,
     User,
     Revenue,
-    Classes,
+    Classes, AttendeesTable,
 } from './definitions';
 import {formatCurrency} from './utils';
 import {unstable_noStore as noStore} from "next/cache";
@@ -286,3 +286,39 @@ export async function fetchFilteredClasses(query: string, currentPage: number) {
     }
 }
 
+
+export async function fetchAttendeesPages(query: string) {
+    noStore();
+    try {
+        const count = await sql`SELECT COUNT(*)
+                                FROM attendees
+        `;
+
+        const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
+        return totalPages;
+    } catch (error) {
+        console.error('Database Error:', error);
+        throw new Error('Failed to fetch total number of attendees.');
+    }
+}
+
+export async function fetchFilteredAttendees(query: string, currentPage: number) {
+    noStore();
+    const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
+    try {
+        const attendees = await sql<AttendeesTable>`
+            SELECT id,
+                   classe_id,
+                   user_id
+            FROM attendees
+                LIMIT ${ITEMS_PER_PAGE}
+            OFFSET ${offset}
+        `;
+
+        return attendees.rows;
+    } catch (err) {
+        console.error('Database Error:', err);
+        throw new Error('Failed to fetch attendees table.');
+    }
+}

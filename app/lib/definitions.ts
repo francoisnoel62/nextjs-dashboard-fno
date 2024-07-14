@@ -95,3 +95,9 @@ export type Classes = {
   date_et_heure: string;
   nombre_de_places_disponibles: number;
 };
+
+export type AttendeesTable = {
+  id: string;
+  classe_id: number;
+  user_id: string;
+};

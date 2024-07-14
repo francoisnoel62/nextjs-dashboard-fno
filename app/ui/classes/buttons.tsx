@@ -1,4 +1,4 @@
-import { PencilIcon, PlusIcon, TrashIcon, ArrowRightOnRectangleIcon, ArrowLeftOnRectangleIcon  } from '@heroicons/react/24/outline';
+import { PlusIcon, ArrowRightOnRectangleIcon, ArrowLeftOnRectangleIcon  } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { deleteClass } from '@/app/lib/actions';
 
