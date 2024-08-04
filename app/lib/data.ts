@@ -308,10 +308,19 @@ export async function fetchFilteredAttendees(query: string, currentPage: number)
 
     try {
         const attendees = await sql<AttendeesTable>`
-            SELECT id,
-                   classe_id,
-                   user_id
-            FROM attendees
+            SELECT a.id,
+                   a.classe_id,
+                   c.nom_de_la_classe as classe_name,
+                   c.date_et_heure as classe_date,
+                   a.user_id,
+                   u.name as user_name
+            FROM attendees a
+                     JOIN classe c ON a.classe_id = c.id
+                     JOIN users u ON a.user_id = u.id
+            WHERE c.nom_de_la_classe ILIKE ${`%${query}%`}
+               OR
+                u.name ILIKE ${`%${query}%`}
+            ORDER BY c.date_et_heure ASC
                 LIMIT ${ITEMS_PER_PAGE}
             OFFSET ${offset}
         `;

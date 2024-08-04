@@ -99,5 +99,8 @@ export type Classes = {
 export type AttendeesTable = {
   id: string;
   classe_id: number;
+  classe_name: string;
+  classe_date: string;
   user_id: string;
+  user_name: string;
 };
