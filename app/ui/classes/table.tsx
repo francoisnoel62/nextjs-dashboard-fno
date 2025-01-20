@@ -12,7 +12,7 @@ export default async function ClassesTable({
   const classes = await fetchFilteredClasses(query, currentPage);
 
   return (
-    <div className="mt-6 flow-root">
+    <div id="classes-tables" className="relative mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">
         <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
           <div className="md:hidden">
@@ -32,7 +32,7 @@ export default async function ClassesTable({
                     </div>
                   </div>
                   <div className="flex justify-end gap-2">
-                    <AddPresence classe_id={classItem.id} />
+                    <AddPresence classe_id={classItem.id} containerId='classes-tables' />
                   </div>
                 </div>
               </div>
@@ -78,7 +78,7 @@ export default async function ClassesTable({
                   </td>
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex justify-end gap-3">
-                      <AddPresence classe_id={classItem.id} />
+                      <AddPresence classe_id={classItem.id} containerId='classes-tables' />
                     </div>
                   </td>
                 </tr>
