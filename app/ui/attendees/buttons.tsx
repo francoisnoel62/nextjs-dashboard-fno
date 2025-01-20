@@ -1,6 +1,9 @@
-import {PlusIcon, TrashIcon} from '@heroicons/react/24/outline';
+"use client";
+
+import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { deleteAttendee } from '@/app/lib/actions';
+import { useRouter } from 'next/navigation';
 
 export function CreateAttendee() {
   return (
@@ -15,15 +18,24 @@ export function CreateAttendee() {
 }
 
 export function DeleteAttendee({ id }: { id: string }) {
-  const deleteAttendeeWithId = async (formData: FormData) => {
-    await deleteAttendee(id);
+  const router = useRouter();
+
+  const handleDelete = async () => {
+    try {
+      await deleteAttendee(id);
+      router.refresh(); // Refresh the page or the relevant data after deletion
+    } catch (error) {
+      console.error('Error deleting attendee:', error);
+    }
   };
+
   return (
-    <form action={deleteAttendeeWithId}>
-      <button className="rounded-md border p-2 hover:bg-gray-100">
-        <span className="sr-only">Delete</span>
-        <TrashIcon className="w-5" />
-      </button>
-    </form>
+    <button
+      onClick={handleDelete}
+      className="rounded-md border p-2 hover:bg-gray-100"
+    >
+      <span className="sr-only">Delete</span>
+      <TrashIcon className="w-5" />
+    </button>
   );
 }
