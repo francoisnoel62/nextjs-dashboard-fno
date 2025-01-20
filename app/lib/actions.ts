@@ -37,7 +37,7 @@ const ClassesShema = z.object({
 const CreateClass = ClassesShema.omit({ id: true });
 const UpdateClass = ClassesShema.omit({ id: true });
 
-export async function updateInvoice(id: string, formData: FormData) {
+export async function updateInvoice(id: string, formData: FormData):Promise<void> {
     const { customerId, amount, status } = UpdateInvoice.parse({
         customerId: formData.get('customerId'),
         amount: formData.get('amount'),
@@ -52,9 +52,8 @@ export async function updateInvoice(id: string, formData: FormData) {
             WHERE id = ${id}
         `;
     } catch (e) {
-        return {
-            message: 'An error occurred while updating the invoice',
-        }
+        console.error(e);
+        throw new Error('An error occurred while updating the invoice');
     }
 
     revalidatePath('/dashboard/invoices');
