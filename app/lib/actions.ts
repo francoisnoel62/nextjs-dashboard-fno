@@ -246,6 +246,7 @@ export async function addPresence(classe_id: number) {
         await sql`
             INSERT INTO attendees (classe_id, user_id)
             VALUES (${classe_id}, ${user_id})
+            ON CONFLICT (classe_id, user_id) DO NOTHING
         `;
         return { message: 'Presence added successfully' };
     } catch (e) {
