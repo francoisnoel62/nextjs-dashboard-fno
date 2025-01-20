@@ -244,12 +244,16 @@ export async function deleteAttendee(id: string) {
 
 
 export async function addPresence(classe_id: number) {
-    const user_id = await getUserID();
+    const session = await auth();
+
+    if (!session?.user?.id) {
+        return { message: 'User not authenticated or ID not available' };
+    }
 
     try {
         await sql`
             INSERT INTO attendees (classe_id, user_id)
-            VALUES (${classe_id}, ${user_id?.toString()})
+            VALUES (${classe_id}, ${session.user.id})
             ON CONFLICT (classe_id, user_id) DO NOTHING
         `;
         return { message: 'Presence added successfully' };
@@ -258,25 +262,5 @@ export async function addPresence(classe_id: number) {
         return {
             message: 'An error occurred while adding the presence',
         };
-    }
-}
-
-async function getUserID() {
-    const session = await auth();
-    let user_id: UUID;
- 
-    if (!session?.user) return null
-    
-    try {
-        user_id = await sql`
-            SELECT id FROM users WHERE email = ${session.user.email}
-        `.then((res) => res.rows[0].id);
-        return user_id;
-    }
-    catch (e) {
-        console.error(e)
-        return {
-            message: 'An error occurred while adding the presence',
-        }
     }
 }
