@@ -76,9 +76,7 @@ export async function createInvoice(formData: FormData): Promise<void> {
             VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
         `;
     } catch (e) {
-        return {
-            message: 'An error occurred while creating the invoice',
-        }
+        throw new Error('An error occurred while creating the invoice');
     }
 
     revalidatePath('/dashboard/invoices');
