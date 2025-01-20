@@ -246,7 +246,6 @@ export async function deleteAttendee(id: string) {
 export async function addPresence(classe_id: number) {
     // let user_id = "99df453e-f54b-426f-b440-8b89f7f1e10d" as UUID;
     const user_id = await getUserID();
-    console.log("The user id here is: ", user_id);
 
     try {
         await sql`
@@ -273,7 +272,6 @@ async function getUserID() {
         user_id = await sql`
             SELECT id FROM users WHERE email = ${session.user.email}
         `.then((res) => res.rows[0].id);
-        console.log("The user id is: ", user_id);
         return user_id;
     }
     catch (e) {
