@@ -11,6 +11,9 @@ import bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import { use } from 'react';
 import { UUID } from 'crypto';
+import { auth } from "@/auth"
+
+
 
 const FormSchema = z.object({
     id: z.string(),
@@ -241,11 +244,14 @@ export async function deleteAttendee(id: string) {
 
 
 export async function addPresence(classe_id: number) {
-    const user_id = "99df453e-f54b-426f-b440-8b89f7f1e10d" as UUID;
+    // let user_id = "99df453e-f54b-426f-b440-8b89f7f1e10d" as UUID;
+    const user_id = await getUserID();
+    console.log("The user id here is: ", user_id);
+
     try {
         await sql`
             INSERT INTO attendees (classe_id, user_id)
-            VALUES (${classe_id}, ${user_id})
+            VALUES (${classe_id}, ${user_id?.toString()})
             ON CONFLICT (classe_id, user_id) DO NOTHING
         `;
         return { message: 'Presence added successfully' };
@@ -254,5 +260,26 @@ export async function addPresence(classe_id: number) {
         return {
             message: 'An error occurred while adding the presence',
         };
+    }
+}
+
+async function getUserID() {
+    const session = await auth();
+    let user_id: UUID;
+ 
+    if (!session?.user) return null
+    
+    try {
+        user_id = await sql`
+            SELECT id FROM users WHERE email = ${session.user.email}
+        `.then((res) => res.rows[0].id);
+        console.log("The user id is: ", user_id);
+        return user_id;
+    }
+    catch (e) {
+        console.error(e)
+        return {
+            message: 'An error occurred while adding the presence',
+        }
     }
 }
