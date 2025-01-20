@@ -1,6 +1,10 @@
-import { PlusIcon, ArrowRightOnRectangleIcon, ArrowLeftOnRectangleIcon  } from '@heroicons/react/24/outline';
+"use client";
+
+import { PlusIcon, ArrowRightOnRectangleIcon, ArrowLeftOnRectangleIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { deleteClass } from '@/app/lib/actions';
+import { useState } from 'react';
+import { addPresence } from '../../lib/actions';
+
 
 export function CreateClass() {
   return (
@@ -14,18 +18,7 @@ export function CreateClass() {
   );
 }
 
-export function UpdateClass({ id }: { id: number }) {
-  return (
-    <Link
-      href={`/dashboard/classes/${id}/edit`}
-      className="rounded-md border p-2 hover:bg-gray-100"
-    >
-      <ArrowLeftOnRectangleIcon className="w-5" />
-    </Link>
-  );
-}
-
-export function DeleteClass({ id }: { id: number }) {
+/* export function DeleteClass({ id }: { id: number }) {
   const deleteClassWithId = deleteClass.bind(null, id);
   return (
     <form action={deleteClassWithId}>
@@ -35,4 +28,44 @@ export function DeleteClass({ id }: { id: number }) {
       </button>
     </form>
   );
+} */
+
+
+
+export function AddPresence({ classe_id }: { classe_id: number }) {
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+
+  const handleAddPresence = async () => {
+    setLoading(true);
+    try {
+
+      const result = await addPresence(classe_id);
+
+      if (result?.message) {
+        setMessage(result.message);
+      }
+
+    } catch (error) {
+      console.error(error);
+      setMessage('An error occurred while adding the presence');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div>
+      <button
+        onClick={handleAddPresence}
+        className="rounded-md border p-2 hover:bg-gray-100"
+        disabled={loading}
+      >
+        <ArrowLeftOnRectangleIcon className="w-5" />
+        {loading ? 'Adding...' : ''}
+      </button>
+      {message && <p>{message}</p>}
+    </div>
+  );
 }
+

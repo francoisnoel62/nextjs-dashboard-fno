@@ -9,6 +9,8 @@ import { AuthError } from 'next-auth';
 import bcrypt from 'bcrypt';
 // import { v4 as uuidv4 } from 'uuid';
 import { v4 as uuidv4 } from 'uuid';
+import { use } from 'react';
+import { UUID } from 'crypto';
 
 const FormSchema = z.object({
     id: z.string(),
@@ -229,11 +231,27 @@ export async function deleteAttendee(id: string) {
             DELETE FROM attendees
             WHERE id = ${id}
         `;
-        revalidatePath('/dashboard/attendees');
         return { message: 'Attendee deleted successfully' };
     } catch (e) {
         return {
             message: 'An error occurred while deleting the attendee',
         }
+    }
+}
+
+
+export async function addPresence(classe_id: number) {
+    const user_id = "99df453e-f54b-426f-b440-8b89f7f1e10d" as UUID;
+    try {
+        await sql`
+            INSERT INTO attendees (classe_id, user_id)
+            VALUES (${classe_id}, ${user_id})
+        `;
+        return { message: 'Presence added successfully' };
+    } catch (e) {
+        console.error(e);
+        return {
+            message: 'An error occurred while adding the presence',
+        };
     }
 }

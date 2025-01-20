@@ -1,5 +1,5 @@
-import { UpdateClass, DeleteClass } from '@/app/ui/classes/buttons';
-import { formatDateToLocalFrance} from '@/app/lib/utils';
+import { AddPresence } from '@/app/ui/classes/buttons';
+import { formatDateToLocalFrance } from '@/app/lib/utils';
 import { fetchFilteredClasses } from '@/app/lib/data';
 
 export default async function ClassesTable({
@@ -32,8 +32,7 @@ export default async function ClassesTable({
                     </div>
                   </div>
                   <div className="flex justify-end gap-2">
-                    <UpdateClass id={classItem.id} />
-                    <DeleteClass id={classItem.id} />
+                    <AddPresence classe_id={classItem.id} />
                   </div>
                 </div>
               </div>
@@ -53,7 +52,7 @@ export default async function ClassesTable({
                   Places
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  <div className="flex justify-end gap-3"><p>Book/Cancel</p></div>
+                  <div className="flex justify-end gap-3"><p>Book</p></div>
                 </th>
               </tr>
             </thead>
@@ -79,8 +78,7 @@ export default async function ClassesTable({
                   </td>
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex justify-end gap-3">
-                      <UpdateClass id={classItem.id} />
-                      <DeleteClass id={classItem.id} />
+                      <AddPresence classe_id={classItem.id} />
                     </div>
                   </td>
                 </tr>
