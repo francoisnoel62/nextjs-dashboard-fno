@@ -1,9 +1,9 @@
 'use server';
 
-import {z} from 'zod';
-import {sql} from '@vercel/postgres';
-import {revalidatePath} from "next/cache";
-import {redirect} from "next/navigation";
+import { z } from 'zod';
+import { sql } from '@vercel/postgres';
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
 import bcrypt from 'bcrypt';
@@ -23,8 +23,8 @@ const FormSchema = z.object({
     date: z.string(),
 });
 
-const CreateInvoice = FormSchema.omit({id: true, date: true});
-const UpdateInvoice = FormSchema.omit({id: true, date: true});
+const CreateInvoice = FormSchema.omit({ id: true, date: true });
+const UpdateInvoice = FormSchema.omit({ id: true, date: true });
 
 const ClassesShema = z.object({
     id: z.string(),
@@ -34,11 +34,11 @@ const ClassesShema = z.object({
     nombre_de_places: z.number(),
 });
 
-const CreateClass = ClassesShema.omit({id: true});
-const UpdateClass = ClassesShema.omit({id: true});
+const CreateClass = ClassesShema.omit({ id: true });
+const UpdateClass = ClassesShema.omit({ id: true });
 
 export async function updateInvoice(id: string, formData: FormData) {
-    const {customerId, amount, status} = UpdateInvoice.parse({
+    const { customerId, amount, status } = UpdateInvoice.parse({
         customerId: formData.get('customerId'),
         amount: formData.get('amount'),
         status: formData.get('status'),
@@ -62,7 +62,7 @@ export async function updateInvoice(id: string, formData: FormData) {
 }
 
 export async function createInvoice(formData: FormData) {
-    const {customerId, amount, status} = CreateInvoice.parse({
+    const { customerId, amount, status } = CreateInvoice.parse({
         customerId: formData.get('customerId'),
         amount: formData.get('amount'),
         status: formData.get('status'),
@@ -102,23 +102,23 @@ export async function deleteInvoice(id: string) {
 }
 
 export async function authenticate(
-  prevState: string | undefined,
-  formData: FormData,
+    prevState: string | undefined,
+    formData: FormData,
 ): Promise<string | undefined> {
-  try {
-    await signIn('credentials', Object.fromEntries(formData));
-    return undefined; // Successful login
-  } catch (error) {
-    if (error instanceof AuthError) {
-      switch (error.type) {
-        case 'CredentialsSignin':
-          return 'Invalid credentials.';
-        default:
-          return 'Something went wrong.';
-      }
+    try {
+        await signIn('credentials', Object.fromEntries(formData));
+        return undefined; // Successful login
+    } catch (error) {
+        if (error instanceof AuthError) {
+            switch (error.type) {
+                case 'CredentialsSignin':
+                    return 'Invalid credentials.';
+                default:
+                    return 'Something went wrong.';
+            }
+        }
+        throw error;
     }
-    throw error;
-  }
 }
 
 const RegisterUser = z.object({
@@ -181,7 +181,7 @@ export async function deleteClass(id: number) {
 }
 
 export async function createClass(formData: FormData) {
-    const {nom_de_la_classe, date_et_heure, type_id, nombre_de_places} = CreateClass.parse({
+    const { nom_de_la_classe, date_et_heure, type_id, nombre_de_places } = CreateClass.parse({
         nom_de_la_classe: formData.get('nom_de_la_classe'),
         date_et_heure: formData.get('date_et_heure'),
         type_id: formData.get('type_id'),
@@ -204,7 +204,7 @@ export async function createClass(formData: FormData) {
 }
 
 export async function updateClass(id: string, formData: FormData) {
-    const {nom_de_la_classe, type_id, date_et_heure, nombre_de_places} = UpdateClass.parse({
+    const { nom_de_la_classe, type_id, date_et_heure, nombre_de_places } = UpdateClass.parse({
         nom_de_la_classe: formData.get('nom_de_la_classe'),
         type_id: formData.get('type_id'),
         date_et_heure: formData.get('date_et_heure'),
@@ -250,17 +250,26 @@ export async function addPresence(classe_id: number) {
         return { message: 'User not authenticated or ID not available' };
     }
 
-    try {
-        await sql`
-            INSERT INTO attendees (classe_id, user_id)
-            VALUES (${classe_id}, ${session.user.id})
-            ON CONFLICT (classe_id, user_id) DO NOTHING
-        `;
-        return { message: 'Presence added successfully' };
-    } catch (e) {
-        console.error(e);
-        return {
-            message: 'An error occurred while adding the presence',
-        };
+    // Check if the user is already attending the class
+    const existingAttendee = await sql`
+        SELECT * FROM attendees
+        WHERE classe_id = ${classe_id} AND user_id = ${session.user.id}
+    `;
+    if (existingAttendee?.rowCount && existingAttendee.rowCount > 0) {
+        return { message: 'You are already attending this class' };
+    } else {
+        try {
+            await sql`
+                INSERT INTO attendees (classe_id, user_id)
+                VALUES (${classe_id}, ${session.user.id})
+                ON CONFLICT (classe_id, user_id) DO NOTHING
+            `;
+            return { message: 'Presence added successfully' };
+        } catch (e) {
+            console.error(e);
+            return {
+                message: 'An error occurred while adding the presence',
+            };
+        }
     }
 }

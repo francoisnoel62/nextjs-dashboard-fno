@@ -15,7 +15,9 @@ export function CreateAttendee() {
 }
 
 export function DeleteAttendee({ id }: { id: string }) {
-  const deleteAttendeeWithId = deleteAttendee.bind(null, id);
+  const deleteAttendeeWithId = async (formData: FormData) => {
+    await deleteAttendee(id);
+  };
   return (
     <form action={deleteAttendeeWithId}>
       <button className="rounded-md border p-2 hover:bg-gray-100">
