@@ -1,3 +1,4 @@
+import { useActionState } from "react";
 'use client';
 
 import {lusitana} from '@/app/ui/fonts';
@@ -11,10 +12,10 @@ import {ArrowRightIcon} from '@heroicons/react/20/solid';
 import {Button} from './button';
 import {register} from '@/app/lib/actions';
 
-import {useFormState, useFormStatus} from 'react-dom';
+import { useFormStatus } from 'react-dom';
 
 export default function RegisterForm() {
-    const [errorMessage, formAction] = useFormState(register, null);
+    const [errorMessage, formAction] = useActionState(register, null);
 
     return (
         <form action={formAction} className="space-y-3">

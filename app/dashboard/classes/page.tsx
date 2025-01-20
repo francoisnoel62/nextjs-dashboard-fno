@@ -6,14 +6,15 @@ import {ClassesTableSkeleton} from '@/app/ui/skeletons';
 import {Suspense} from 'react';
 import { fetchClassesPages } from '@/app/lib/data';
 
-export default async function Page({
-                                       searchParams,
-                                   }: {
-    searchParams?: {
-        query?: string;
-        page?: string;
-    };
-}) {
+export default async function Page(
+    props: {
+        searchParams?: Promise<{
+            query?: string;
+            page?: string;
+        }>;
+    }
+) {
+    const searchParams = await props.searchParams;
     const query = searchParams?.query || '';
     const currentPage = Number(searchParams?.page) || 1;
 

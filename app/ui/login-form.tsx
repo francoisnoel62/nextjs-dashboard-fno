@@ -1,3 +1,4 @@
+import { useActionState } from "react";
 'use client';
 
 import {lusitana} from '@/app/ui/fonts';
@@ -11,15 +12,13 @@ import {Button} from './button';
 // import {useActionState} from 'react';
 import {authenticate} from '@/app/lib/actions';
 
-import {useFormState} from 'react-dom';
-
 export default function LoginForm() {
     // const [errorMessage, formAction, isPending] = useActionState(
     //     authenticate,
     //     undefined,
     // );
 
-    const [errorMessage, formAction] = useFormState(authenticate, undefined);
+    const [errorMessage, formAction] = useActionState(authenticate, undefined);
 
     return (
         <form action={formAction} className="space-y-3">
