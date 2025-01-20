@@ -244,7 +244,6 @@ export async function deleteAttendee(id: string) {
 
 
 export async function addPresence(classe_id: number) {
-    // let user_id = "99df453e-f54b-426f-b440-8b89f7f1e10d" as UUID;
     const user_id = await getUserID();
 
     try {
