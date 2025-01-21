@@ -64,16 +64,28 @@ export default async function ClassesTable({
                 >
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex items-center gap-3">
-                      <p>{classItem.nom_de_la_classe}</p>
+                      <p><b>{classItem.nom_de_la_classe}</b></p>
                     </div>
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    {classItem.type}
+                    <span className={`text-xs font-medium me-2 px-2.5 py-0.5 rounded border ${
+                      classItem.type === 'adults'
+                      ? 'bg-blue-100 text-blue-800 border-blue-400'
+                      : classItem.type === 'adults&teens'
+                      ? 'bg-green-100 text-green-800 border-green-400'
+                      : classItem.type === 'kids'
+                      ? 'bg-pink-100 text-pink-800 border-pink-400'
+                      : classItem.type === 'teens'
+                      ? 'bg-gray-100 text-gray-800 border-gray-400'
+                      : 'bg-yellow-100 text-yellow-800 border-yellow-400'
+                      }`}>
+                      {classItem.type}
+                    </span>
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    {formatDateToLocalFrance(classItem.date_et_heure)}
+                    <i>{formatDateToLocalFrance(classItem.date_et_heure)}</i>
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3">
+                  <td className="whitespace-nowrap px-3 py-3 text-gray-500">
                     {classItem.nombre_de_places_disponibles}
                   </td>
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
