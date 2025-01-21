@@ -37,7 +37,7 @@ const ClassesShema = z.object({
 const CreateClass = ClassesShema.omit({ id: true });
 const UpdateClass = ClassesShema.omit({ id: true });
 
-export async function updateInvoice(id: string, formData: FormData):Promise<void> {
+export async function updateInvoice(id: string, formData: FormData): Promise<void> {
     const { customerId, amount, status } = UpdateInvoice.parse({
         customerId: formData.get('customerId'),
         amount: formData.get('amount'),
@@ -226,6 +226,20 @@ export async function updateClass(id: string, formData: FormData) {
 
 export async function deleteAttendee(id: string) {
     try {
+        //// Update the class
+        //1. Get the classe_id
+        const classe = await sql`
+            SELECT classe_id FROM attendees
+            WHERE id = ${id}
+        `;
+        const classe_id = classe.rows[0].classe_id;
+        //2. Update the class
+        await sql`
+            UPDATE classe
+            SET nombre_de_places_disponibles = nombre_de_places_disponibles + 1
+            WHERE id = ${classe_id}
+        `;
+        // Delete the attendee
         await sql`
             DELETE FROM attendees
             WHERE id = ${id}
@@ -242,32 +256,49 @@ export async function deleteAttendee(id: string) {
 
 
 export async function addPresence(classe_id: number) {
-    const session = await auth();
+    try {
+        // Get the user's ID
+        const session = await auth();
+        if (!session?.user?.id) {
+            return { message: 'User not authenticated or ID not available' };
+        }
 
-    if (!session?.user?.id) {
-        return { message: 'User not authenticated or ID not available' };
-    }
-
-    // Check if the user is already attending the class
-    const existingAttendee = await sql`
+        // Check if the user is already attending the class
+        const existingAttendee = await sql`
         SELECT * FROM attendees
         WHERE classe_id = ${classe_id} AND user_id = ${session.user.id}
-    `;
-    if (existingAttendee?.rowCount && existingAttendee.rowCount > 0) {
-        return { message: 'You are already attending this class' };
-    } else {
-        try {
-            await sql`
-                INSERT INTO attendees (classe_id, user_id)
-                VALUES (${classe_id}, ${session.user.id})
-                ON CONFLICT (classe_id, user_id) DO NOTHING
-            `;
-            return { message: 'Presence added successfully' };
-        } catch (e) {
-            console.error(e);
-            return {
-                message: 'An error occurred while adding the presence',
-            };
+        `;
+        if (existingAttendee?.rowCount && existingAttendee.rowCount > 0) {
+            return { message: 'You are already attending this class' };
         }
+
+        // Check if the class is full
+        const classInfo = await sql`
+        SELECT nombre_de_places_disponibles FROM classe
+        WHERE id = ${classe_id}
+        `;
+        if (classInfo?.rowCount && classInfo.rowCount === 0) {
+            return { message: 'Class is full' }
+        }
+
+        // If the user is not already attending the class and the class is not full, add the presence
+        await sql`
+            INSERT INTO attendees (classe_id, user_id)
+            VALUES (${classe_id}, ${session.user.id})
+            ON CONFLICT (classe_id, user_id) DO NOTHING
+        `;
+        await sql`
+            UPDATE classe
+            SET nombre_de_places_disponibles = nombre_de_places_disponibles - 1
+            WHERE id = ${classe_id}
+        `;
+
+        revalidatePath('/dashboard/classes');
+        return { message: 'Presence added successfully' };
+    } catch (e) {
+        console.error(e);
+        return {
+            message: 'An error occurred while adding the presence',
+        };
     }
 }

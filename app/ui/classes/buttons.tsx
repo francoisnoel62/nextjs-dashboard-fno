@@ -36,13 +36,13 @@ export function AddPresence({ classe_id, containerId = '', }: { classe_id: numbe
       if (result?.message) {
         setMessage(result.message);
         setShowToast(true);
-        setTimeout(() => setShowToast(false), 3000); // Auto-hide after 3 seconds
+        setTimeout(() => setShowToast(false), 1000); // Auto-hide after 3 seconds
       }
     } catch (error) {
       console.error(error);
       setMessage('An error occurred while adding the presence');
       setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000); // Auto-hide after 3 seconds
+      setTimeout(() => setShowToast(false), 1000); // Auto-hide after 3 seconds
     } finally {
       setLoading(false);
     }
