@@ -1,6 +1,7 @@
 import { AddPresence } from '@/app/ui/classes/buttons';
 import { formatDateToLocalFrance } from '@/app/lib/utils';
 import { fetchFilteredClasses } from '@/app/lib/data';
+import { getTypeStyles } from '@/app/lib/typeStyles';
 
 export default async function ClassesTable({
   query,
@@ -68,17 +69,7 @@ export default async function ClassesTable({
                     </div>
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    <span className={`text-xs font-medium me-2 px-2.5 py-0.5 rounded border ${
-                      classItem.type === 'adults'
-                      ? 'bg-blue-100 text-blue-800 border-blue-400'
-                      : classItem.type === 'adults&teens'
-                      ? 'bg-green-100 text-green-800 border-green-400'
-                      : classItem.type === 'kids'
-                      ? 'bg-pink-100 text-pink-800 border-pink-400'
-                      : classItem.type === 'teens'
-                      ? 'bg-gray-100 text-gray-800 border-gray-400'
-                      : 'bg-yellow-100 text-yellow-800 border-yellow-400'
-                      }`}>
+                    <span className={`text-xs font-medium me-2 px-2.5 py-0.5 rounded border ${getTypeStyles(classItem.type)}`}>
                       {classItem.type}
                     </span>
                   </td>

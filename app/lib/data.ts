@@ -340,3 +340,17 @@ export async function fetchFilteredAttendees(query: string, currentPage: number)
         throw new Error('Failed to fetch attendees table.');
     }
 }
+
+export async function getClassTypes() {
+    try {
+        const { rows } = await sql<{ id: number, type: string }>`
+            SELECT id, type_name as type 
+            FROM classetype
+            ORDER BY id ASC
+        `;
+        return rows;
+    } catch (error) {
+        console.error('Failed to fetch class types:', error);
+        throw new Error('Failed to fetch class types.');
+    }
+}
