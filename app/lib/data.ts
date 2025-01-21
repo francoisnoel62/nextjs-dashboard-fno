@@ -354,3 +354,19 @@ export async function getClassTypes() {
         throw new Error('Failed to fetch class types.');
     }
 }
+
+export async function fetchProfileByUserId(userId: string) {
+    try {
+        const data = await sql`
+            SELECT first_name, last_name, address, telephone, date_of_birth
+            FROM profiles
+            WHERE user_id = ${userId}
+            LIMIT 1
+        `;
+
+        return data.rows[0] || null;
+    } catch (error) {
+        console.error('Database Error:', error);
+        throw new Error('Failed to fetch profile data.');
+    }
+}

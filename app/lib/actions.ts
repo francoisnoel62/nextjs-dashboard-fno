@@ -302,3 +302,65 @@ export async function addPresence(classe_id: number) {
         };
     }
 }
+
+// Add Profile schema
+const ProfileSchema = z.object({
+  first_name: z.string().min(1, 'First name is required'),
+  last_name: z.string().min(1, 'Last name is required'),
+  address: z.string().min(1, 'Address is required'),
+  telephone: z.string().min(1, 'Telephone is required'),
+  date_of_birth: z.string().min(1, 'Date of birth is required'),
+});
+
+export async function createOrUpdateProfile(formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error('Unauthorized');
+  }
+
+  const validatedFields = ProfileSchema.safeParse({
+    first_name: formData.get('first_name'),
+    last_name: formData.get('last_name'),
+    address: formData.get('address'),
+    telephone: formData.get('telephone'),
+    date_of_birth: formData.get('date_of_birth'),
+  });
+
+  if (!validatedFields.success) {
+    throw new Error('Invalid form data');
+  }
+
+  const { first_name, last_name, address, telephone, date_of_birth } = validatedFields.data;
+  const userId = session.user.id;
+
+  try {
+    const existingProfile = await sql`
+      SELECT id FROM profiles WHERE user_id = ${userId}
+    `;
+
+    if (existingProfile.rows.length > 0) {
+      await sql`
+        UPDATE profiles
+        SET first_name = ${first_name},
+            last_name = ${last_name},
+            address = ${address},
+            telephone = ${telephone},
+            date_of_birth = ${date_of_birth},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = ${userId}
+      `;
+    } else {
+      await sql`
+        INSERT INTO profiles (user_id, first_name, last_name, address, telephone, date_of_birth)
+        VALUES (${userId}, ${first_name}, ${last_name}, ${address}, ${telephone}, ${date_of_birth}::date)
+      `;
+    }
+
+    revalidatePath('/dashboard/profil');
+  } catch (error) {
+    console.error('Profile save error:', error);
+    throw new Error('Failed to save profile.');
+  }
+
+  redirect('/dashboard/profil');
+}
