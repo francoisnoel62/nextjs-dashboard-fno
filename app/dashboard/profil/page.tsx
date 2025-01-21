@@ -1,6 +1,7 @@
 import { auth } from '@/auth';
 import ProfileForm from '@/app/ui/profil/profil-form';
 import { fetchProfileByUserId } from '@/app/lib/data';
+import { lusitana } from '@/app/ui/fonts';
 
 export default async function ProfilePage() {
   const session = await auth();
@@ -21,7 +22,7 @@ export default async function ProfilePage() {
 
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-2xl font-bold mb-6 text-center">Profile Settings</h1>
+      <h1 className={`${lusitana.className} text-2xl text-center mb-6`}>Profile Settings</h1>
       <ProfileForm initialData={profileData} />
     </div>
   );
