@@ -65,7 +65,6 @@ export function AddPresence({ classe_id, containerId = '', }: { classe_id: numbe
           <Toast
             message={message}
             onClose={() => setShowToast(false)}
-            variant='success'
           />,
           containerElement
         )}

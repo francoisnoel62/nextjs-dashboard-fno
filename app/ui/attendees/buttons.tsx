@@ -4,6 +4,9 @@ import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { deleteAttendee } from '@/app/lib/actions';
 import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { Toast } from '../notifications';
 
 export function CreateAttendee() {
   return (
@@ -17,25 +20,54 @@ export function CreateAttendee() {
   );
 }
 
-export function DeleteAttendee({ id }: { id: string }) {
-  const router = useRouter();
+export function DeleteAttendee({ id, containerId = '' }: { id: string, containerId?: string }) {
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const [showToast, setShowToast] = useState(false);
 
   const handleDelete = async () => {
+    setLoading(true);
     try {
-      await deleteAttendee(id);
-      router.refresh(); // Refresh the page or the relevant data after deletion
+      const result = await deleteAttendee(id);
+
+      if (result?.message) {
+        setMessage(result.message);
+        setShowToast(true);
+        setTimeout(() => {
+          setShowToast(false);
+        }, 3000);
+      }
     } catch (error) {
       console.error('Error deleting attendee:', error);
+      setMessage('An error occurred while deleting the attendee');
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+    } finally {
+      setLoading(false);
     }
   };
 
+  const containerElement = containerId && typeof window !== 'undefined' ? document.getElementById(containerId) : null;
+
   return (
-    <button
-      onClick={handleDelete}
-      className="rounded-md border p-2 hover:bg-gray-100"
-    >
-      <span className="sr-only">Delete</span>
-      <TrashIcon className="w-5" />
-    </button>
+    <div className="relative">
+      <button
+        onClick={handleDelete}
+        className="rounded-md border p-2 hover:bg-gray-100"
+        disabled={loading}
+      >
+        <span className="sr-only">Delete</span>
+        <TrashIcon className="w-5" />
+      </button>
+      {showToast &&
+        containerElement &&
+        createPortal(
+          <Toast
+            message={message}
+            onClose={() => setShowToast(false)}
+          />,
+          containerElement
+        )}
+    </div>
   );
 }
