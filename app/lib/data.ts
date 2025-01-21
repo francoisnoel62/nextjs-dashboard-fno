@@ -358,13 +358,12 @@ export async function getClassTypes() {
 export async function fetchProfileByUserId(userId: string) {
     try {
         const data = await sql`
-            SELECT first_name, last_name, address, telephone, date_of_birth
-            FROM profiles
+            SELECT first_name, last_name, address, telephone, 
+                   TO_CHAR(date_of_birth, 'YYYY-MM-DD') as date_of_birth
+            FROM profiles 
             WHERE user_id = ${userId}
-            LIMIT 1
         `;
-
-        return data.rows[0] || null;
+        return data.rows[0];
     } catch (error) {
         console.error('Database Error:', error);
         throw new Error('Failed to fetch profile data.');

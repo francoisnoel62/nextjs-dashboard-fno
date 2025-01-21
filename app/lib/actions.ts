@@ -345,7 +345,7 @@ export async function createOrUpdateProfile(formData: FormData) {
             last_name = ${last_name},
             address = ${address},
             telephone = ${telephone},
-            date_of_birth = ${date_of_birth},
+            date_of_birth = ${date_of_birth}::date,
             updated_at = CURRENT_TIMESTAMP
         WHERE user_id = ${userId}
       `;
