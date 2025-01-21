@@ -20,18 +20,6 @@ export function CreateClass() {
   );
 }
 
-/* export function DeleteClass({ id }: { id: number }) {
-  const deleteClassWithId = deleteClass.bind(null, id);
-  return (
-    <form action={deleteClassWithId}>
-      <button className="rounded-md border p-2 hover:bg-gray-100">
-        <span className="sr-only">Delete</span>
-        <ArrowRightOnRectangleIcon className="w-5" />
-      </button>
-    </form>
-  );
-} */
-
 
 
 export function AddPresence({ classe_id, containerId = '', }: { classe_id: number, containerId?: string; }) {
@@ -43,7 +31,6 @@ export function AddPresence({ classe_id, containerId = '', }: { classe_id: numbe
   const handleAddPresence = async () => {
     setLoading(true);
     try {
-
       const result = await addPresence(classe_id);
 
       if (result?.message) {
@@ -51,7 +38,6 @@ export function AddPresence({ classe_id, containerId = '', }: { classe_id: numbe
         setShowToast(true);
         setTimeout(() => setShowToast(false), 3000); // Auto-hide after 3 seconds
       }
-
     } catch (error) {
       console.error(error);
       setMessage('An error occurred while adding the presence');
@@ -72,7 +58,6 @@ export function AddPresence({ classe_id, containerId = '', }: { classe_id: numbe
         disabled={loading}
       >
         <ArrowLeftOnRectangleIcon className="w-5 h-5" />
-        {loading ? 'Adding...' : ''}
       </button>
       {showToast &&
         containerElement &&
@@ -80,6 +65,7 @@ export function AddPresence({ classe_id, containerId = '', }: { classe_id: numbe
           <Toast
             message={message}
             onClose={() => setShowToast(false)}
+            variant='success'
           />,
           containerElement
         )}

@@ -12,7 +12,7 @@ export default async function AttendeesTable({
   const attendees = await fetchFilteredAttendees(query, currentPage);
 
   return (
-    <div className="mt-6 flow-root">
+    <div id="attendees-tables" className="relative mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">
         <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
           <div className="md:hidden">
@@ -34,7 +34,7 @@ export default async function AttendeesTable({
                     </div>
                   </div>
                   <div className="flex justify-end gap-2">
-                    <DeleteAttendee id={attendeeItem.id} />
+                    <DeleteAttendee id={attendeeItem.id} containerId='attendees-tables' />
                   </div>
                 </div>
               </div>
@@ -73,7 +73,7 @@ export default async function AttendeesTable({
                     </td>
                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                       <div className="flex justify-end gap-3">
-                        <DeleteAttendee id={attendeeItem.id}/>
+                        <DeleteAttendee id={attendeeItem.id} containerId='attendees-tables'/>
                       </div>
                     </td>
                   </tr>
