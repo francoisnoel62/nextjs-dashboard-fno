@@ -25,9 +25,9 @@ export default async function ClassesTable({
                   <div>
                     <div className="mb-2">
                       <p><b>{classItem.nom_de_la_classe}</b></p>
-                      <p>{formatDateToLocalFrance(classItem.date_et_heure)}</p>
+                      <p><i>{formatDateToLocalFrance(classItem.date_et_heure)}</i></p>
                     </div>
-                    <div className="mb-2">
+                    <div className="mb-2 text-gray-500">
                       <p><i>{classItem.nombre_de_places_disponibles} places disponibles</i></p>
                     </div>
                   </div>

@@ -11,6 +11,10 @@ export default async function AttendeesTable({
 }) {
   const attendees = await fetchFilteredAttendees(query, currentPage);
 
+  if ('message' in attendees) {
+    return <div>{attendees.message}</div>;
+  }
+
   return (
     <div id="attendees-tables" className="relative mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">

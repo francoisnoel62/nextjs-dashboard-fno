@@ -11,6 +11,7 @@ import {
 } from './definitions';
 import {formatCurrency} from './utils';
 import {unstable_noStore as noStore} from "next/cache";
+import { auth } from '@/auth';
 
 export async function fetchRevenue() {
     // Add noStore() here to prevent the response from being cached.
@@ -306,6 +307,12 @@ export async function fetchFilteredAttendees(query: string, currentPage: number)
     noStore();
     const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
+    // Get the user's ID
+    const session = await auth();
+    if (!session?.user?.id) {
+        return { message: 'User not authenticated or ID not available' };
+    }
+
     try {
         const attendees = await sql<AttendeesTable>`
             SELECT a.id,
@@ -317,9 +324,11 @@ export async function fetchFilteredAttendees(query: string, currentPage: number)
             FROM attendees a
                      JOIN classe c ON a.classe_id = c.id
                      JOIN users u ON a.user_id = u.id
-            WHERE c.nom_de_la_classe ILIKE ${`%${query}%`}
+            WHERE a.user_id = ${session.user.id}
+               AND
+                (c.nom_de_la_classe ILIKE ${`%${query}%`}
                OR
-                u.name ILIKE ${`%${query}%`}
+                u.name ILIKE ${`%${query}%`})
             ORDER BY c.date_et_heure ASC
                 LIMIT ${ITEMS_PER_PAGE}
             OFFSET ${offset}
