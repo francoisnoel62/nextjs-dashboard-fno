@@ -72,8 +72,8 @@ export default async function AttendeesTable({
                     </div>
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    <div className="flex items-center gap-3">
-                      <p><i>{attendeeItem.classe_type}</i></p>
+                  <div className="mb-2 text-sm text-gray-500">
+                    <span className="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">{attendeeItem.classe_type}</span>
                     </div>
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
