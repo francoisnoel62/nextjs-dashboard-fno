@@ -307,7 +307,6 @@ export async function fetchFilteredAttendees(query: string, currentPage: number)
     noStore();
     const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
-    // Get the user's ID
     const session = await auth();
     if (!session?.user?.id) {
         return { message: 'User not authenticated or ID not available' };
@@ -320,10 +319,13 @@ export async function fetchFilteredAttendees(query: string, currentPage: number)
                    c.nom_de_la_classe as classe_name,
                    c.date_et_heure as classe_date,
                    a.user_id,
-                   u.name as user_name
+                   u.name as user_name,
+                   a.created_at as booking_date,
+                   ct.type_name as classe_type
             FROM attendees a
                      JOIN classe c ON a.classe_id = c.id
                      JOIN users u ON a.user_id = u.id
+                     JOIN classetype ct ON c.type_id = ct.id
             WHERE a.user_id = ${session.user.id}
                AND
                 (c.nom_de_la_classe ILIKE ${`%${query}%`}

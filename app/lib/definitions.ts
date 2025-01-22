@@ -101,6 +101,8 @@ export type AttendeesTable = {
   classe_id: number;
   classe_name: string;
   classe_date: string;
+  classe_type: string;
+  booking_date: string;
   user_id: string;
   user_name: string;
 };

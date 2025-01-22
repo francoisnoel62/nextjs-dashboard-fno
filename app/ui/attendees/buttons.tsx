@@ -35,13 +35,13 @@ export function DeleteAttendee({ id, containerId = '' }: { id: string, container
         setShowToast(true);
         setTimeout(() => {
           setShowToast(false);
-        }, 1000);
+        }, 2000);
       }
     } catch (error) {
       console.error('Error deleting attendee:', error);
       setMessage('An error occurred while deleting the attendee');
       setShowToast(true);
-      setTimeout(() => setShowToast(false), 1000);
+      setTimeout(() => setShowToast(false), 2000);
     } finally {
       setLoading(false);
     }
