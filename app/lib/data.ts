@@ -62,6 +62,11 @@ export async function fetchCardData() {
         const nombre_classes_par_semaine = await sql`SELECT nombre_classes_par_semaine
                                         FROM abonnements
                                         WHERE profile_id = ${profileId}`;
+        const jour_abonnement = await sql`
+            SELECT c.nom_de_la_classe
+            FROM abonnements a
+            JOIN classe c ON a.default_classe = c.id
+            WHERE a.profile_id = ${profileId}`;
         const date_echeance_abonnement = await sql`
             SELECT TO_CHAR(date_de_debut_contrat + INTERVAL '365 days', 'YYYY-MM-DD') as date_echeance_abonnement 
             FROM abonnements
@@ -75,8 +80,11 @@ export async function fetchCardData() {
                                                 WHERE nombre_credits = 0
                                                 AND profile_id = ${profileId}`;
 
+        console.log(jour_abonnement);
+
         return {
             nombre_classes_par_semaine_value: nombre_classes_par_semaine.rows[0]?.nombre_classes_par_semaine ?? null,
+            jour_abonnement_value: jour_abonnement.rows[0]?.nom_de_la_classe ?? null,
             date_echeance_abonnement_value: date_echeance_abonnement.rows[0]?.date_echeance_abonnement
                 ? new Date(date_echeance_abonnement.rows[0].date_echeance_abonnement)
                 : null,

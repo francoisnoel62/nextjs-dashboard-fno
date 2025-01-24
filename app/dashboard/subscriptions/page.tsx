@@ -10,6 +10,7 @@ import { formatDateToLocalFrance } from '@/app/lib/utils';
 export default async function SubscriptionsPage() {
     const {
         nombre_classes_par_semaine_value,
+        jour_abonnement_value,
         date_echeance_abonnement_value,
         current_credits_value,
         total_anciennes_cartes_value
@@ -27,6 +28,14 @@ export default async function SubscriptionsPage() {
                     type="sub"
                     text={nombre_classes_par_semaine_value
                         ? "classes par semaine"
+                        : "Pas d'abonnement en cours"} />
+                <Card title="Mon jour d'abonnement"
+                    value={jour_abonnement_value
+                        ? jour_abonnement_value
+                        : ""}
+                    type="sub"
+                    text={jour_abonnement_value
+                        ? ""
                         : "Pas d'abonnement en cours"} />
                 <Card
                     title="Date échéance abonnement"
