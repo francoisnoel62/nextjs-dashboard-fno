@@ -78,7 +78,7 @@ export default async function AttendeesTable({
                 Date de réservation
               </th>
               <th scope="col" className="px-3 py-5 font-medium">
-                Actions
+                
               </th>
             </tr>
           </thead>
