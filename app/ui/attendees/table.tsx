@@ -78,7 +78,7 @@ export default async function AttendeesTable({
                 Date de réservation
               </th>
               <th scope="col" className="px-3 py-5 font-medium">
-                
+                Abo ou carte
               </th>
             </tr>
           </thead>
@@ -103,6 +103,11 @@ export default async function AttendeesTable({
                 </td>
                 <td className="whitespace-nowrap px-3 py-3 text-gray-500">
                   {formatDateToLocalFrance(attendeeItem.booking_date)}
+                </td>
+                <td className="whitespace-nowrap px-3 py-3">
+                  <div className="mb-2 text-sm text-gray-500">
+                    <span className="bg-orange-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">{attendeeItem.classe_name}</span>
+                  </div>
                 </td>
                 <td className="whitespace-nowrap py-3 pl-6 pr-3">
                   <div className="flex justify-end gap-3">

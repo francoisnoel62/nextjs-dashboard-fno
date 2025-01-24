@@ -48,7 +48,7 @@ export function Card({
       </div>
       <p
         className={`${lusitana.className}
-          truncate rounded-xl bg-white px-4 py-8 text-center text-lg text-gray-500`}>
+          truncate rounded-xl bg-white px-4 py-8 text-center text-sm text-gray-500`}>
         <i>{value} {text}</i>
       </p>
     </div>
