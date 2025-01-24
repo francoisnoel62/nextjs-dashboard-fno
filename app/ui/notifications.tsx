@@ -1,3 +1,8 @@
+import {
+  DocumentCheckIcon,
+  ExclamationTriangleIcon,
+} from '@heroicons/react/24/outline';
+
 export function Toast({ message, onClose }: { message: string; onClose: () => void }) {
   const isAlreadyAttending = message === 'You are already attending this class';
   
@@ -6,7 +11,7 @@ export function Toast({ message, onClose }: { message: string; onClose: () => vo
       isAlreadyAttending ? 'bg-orange-100' : 'bg-green-100'
     }`}>
       <div className={isAlreadyAttending ? 'text-orange-600' : 'text-green-600'}>
-        <svg
+        {/* <svg
           xmlns="http://www.w3.org/2000/svg"
           className="h-6 w-6"
           fill="none"
@@ -19,7 +24,12 @@ export function Toast({ message, onClose }: { message: string; onClose: () => vo
             strokeWidth={2}
             d="M9 12l2 2 4-4m-6 8a9 9 0 110-18 9 9 0 010 18z"
           />
-        </svg>
+        </svg> */}
+        {isAlreadyAttending ? ( 
+          <ExclamationTriangleIcon className="h-6 w-6 text-orange-500" />
+        ) : (
+          <DocumentCheckIcon className="h-6 w-6 text-green-500" />
+        )}
       </div>
       <p className={`text-sm ${isAlreadyAttending ? 'text-orange-800' : 'text-green-800'}`}>{message}</p>
       <button
