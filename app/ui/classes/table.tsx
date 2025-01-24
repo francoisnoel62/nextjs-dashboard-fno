@@ -25,7 +25,12 @@ export default async function ClassesTable({
                 <div className="flex items-center justify-between border-b pb-4">
                   <div>
                     <div className="mb-2">
-                      <p><b>{classItem.nom_de_la_classe}</b></p>
+                      <div className="flex items-center gap-2">
+                        <p><b>{classItem.nom_de_la_classe}</b></p>
+                        <span className={`text-xs font-medium me-2 px-2.5 py-0.5 rounded border ${getTypeStyles(classItem.type)}`}>
+                          {classItem.type}
+                        </span>
+                      </div>
                       <p><i>{formatDateToLocalFrance(classItem.date_et_heure)}</i></p>
                     </div>
                     <div className="mb-2 text-gray-500">
@@ -45,12 +50,11 @@ export default async function ClassesTable({
                 <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
                   Name
                 </th>
-                <th scope="col" className="px-3 py-5 font-medium">Type</th>
                 <th scope="col" className="px-3 py-5 font-medium">
                   Date
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  Places
+                  Places disponibles
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
                   <div className="flex justify-end gap-3"><p>Book</p></div>
@@ -65,13 +69,13 @@ export default async function ClassesTable({
                 >
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex items-center gap-3">
-                      <p><b>{classItem.nom_de_la_classe}</b></p>
+                      <div className="flex items-center gap-2">
+                        <p><b>{classItem.nom_de_la_classe}</b></p>
+                        <span className={`text-xs font-medium me-2 px-2.5 py-0.5 rounded border ${getTypeStyles(classItem.type)}`}>
+                          {classItem.type}
+                        </span>
+                      </div>
                     </div>
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-3">
-                    <span className={`text-xs font-medium me-2 px-2.5 py-0.5 rounded border ${getTypeStyles(classItem.type)}`}>
-                      {classItem.type}
-                    </span>
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
                     <i>{formatDateToLocalFrance(classItem.date_et_heure)}</i>
