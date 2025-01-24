@@ -53,7 +53,7 @@ export default async function ClassesTable({
                 <th scope="col" className="px-3 py-5 font-medium">
                   Date
                 </th>
-                <th scope="col" className="px-3 py-5 font-medium">
+                <th scope="col" className="px-3 py-5 font-medium text-center">
                   Places disponibles
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
@@ -80,7 +80,7 @@ export default async function ClassesTable({
                   <td className="whitespace-nowrap px-3 py-3">
                     <i>{formatDateToLocalFrance(classItem.date_et_heure)}</i>
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3 text-gray-500">
+                  <td className="whitespace-nowrap px-3 py-3 text-gray-500 text-center">
                     {classItem.nombre_de_places_disponibles}
                   </td>
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
