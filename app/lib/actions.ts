@@ -225,25 +225,45 @@ export async function updateClass(id: string, formData: FormData) {
 }
 
 export async function deleteAttendee(id: string) {
+    const session = await auth();
+    if (!session?.user?.id) {
+        return { message: 'User not authenticated or ID not available' };
+    }
+    const profile = await sql`
+        SELECT id FROM profiles
+        WHERE user_id = ${session.user.id}
+    `;
+    const profile_id = profile.rows[0].id;
     try {
-        //// Update the class
-        //1. Get the classe_id
-        const classe = await sql`
-            SELECT classe_id FROM attendees
+        // Get attendee details including product type and user_id
+        const attendee = await sql`
+            SELECT classe_id, product, user_id FROM attendees
             WHERE id = ${id}
         `;
-        const classe_id = classe.rows[0].classe_id;
-        //2. Update the class
+        const { classe_id, product, user_id } = attendee.rows[0];
+
+        // If product is 'carte à 10', increment credits
+        if (product === 'carte à 10') {
+            await sql`
+                UPDATE carte_a_10
+                SET nombre_credits = nombre_credits + 1
+                WHERE profile_id = ${profile_id} AND status = true
+            `;
+        }
+
+        // Update the class slots
         await sql`
             UPDATE classe
             SET nombre_de_places_disponibles = nombre_de_places_disponibles + 1
             WHERE id = ${classe_id}
         `;
+
         // Delete the attendee
         await sql`
             DELETE FROM attendees
             WHERE id = ${id}
         `;
+
         revalidatePath('/dashboard/attendees');
         return { message: 'Attendee deleted successfully' };
     } catch (e) {
@@ -257,51 +277,140 @@ export async function deleteAttendee(id: string) {
 
 export async function addPresence(classe_id: number) {
     try {
-        // Get the user's ID
+        // Authenticate user and get user ID
         const session = await auth();
-        if (!session?.user?.id) {
+        const user_id = session?.user?.id;
+        if (!user_id) {
             return { message: 'User not authenticated or ID not available' };
         }
 
-        // Check if the user is already attending the class
-        const existingAttendee = await sql`
-        SELECT * FROM attendees
-        WHERE classe_id = ${classe_id} AND user_id = ${session.user.id}
+        // Check if user is already attending the class
+        const isAlreadyAttending = await sql`
+            SELECT id FROM attendees
+            WHERE classe_id = ${classe_id} AND user_id = ${user_id}
         `;
-        if (existingAttendee?.rowCount && existingAttendee.rowCount > 0) {
+        if (isAlreadyAttending.rowCount && isAlreadyAttending.rows[0].id > 0) {
             return { message: 'You are already attending this class' };
         }
 
-        // Check if the class is full
-        const classInfo = await sql`
-        SELECT nombre_de_places_disponibles FROM classe
-        WHERE id = ${classe_id}
-        `;
-        if (classInfo?.rowCount && classInfo.rowCount === 0) {
-            return { message: 'Class is full' }
-        }
-
-        // If the user is not already attending the class and the class is not full, add the presence
-        await sql`
-            INSERT INTO attendees (classe_id, user_id)
-            VALUES (${classe_id}, ${session.user.id})
-            ON CONFLICT (classe_id, user_id) DO NOTHING
-        `;
-        await sql`
-            UPDATE classe
-            SET nombre_de_places_disponibles = nombre_de_places_disponibles - 1
+        // Check if the class has available slots
+        const classAvailability = await sql`
+            SELECT nombre_de_places_disponibles FROM classe
             WHERE id = ${classe_id}
         `;
+        if (classAvailability.rowCount === 0 || classAvailability.rows[0].nombre_de_places_disponibles <= 0) {
+            return { message: 'Class is full' };
+        }
+
+        // Fetch user profile ID
+        const profile = await sql`
+            SELECT id FROM profiles
+            WHERE user_id = ${user_id}
+        `;
+        const profile_id = profile.rows[0]?.id;
+        if (!profile_id) {
+            return { message: 'Profile not found' };
+        }
+
+        // Check user's abonnement and carte_a_10
+        const abonnement = await sql`
+            SELECT a.id, a.used_credits_this_week,
+                   c1.nom_de_la_classe as default_classe_1_name,
+                   c2.nom_de_la_classe as default_classe_2_name
+            FROM abonnements a
+            LEFT JOIN classe c1 ON a.default_classe_1 = c1.id
+            LEFT JOIN classe c2 ON a.default_classe_2 = c2.id
+            WHERE a.profile_id = ${profile_id}
+        `;
+        const carte_a_10 = await sql`
+            SELECT id, nombre_credits
+            FROM carte_a_10
+            WHERE status = 'true'
+            AND profile_id = ${profile_id}
+        `;
+
+        // Get the current class name
+        const currentClass = await sql`
+            SELECT nom_de_la_classe
+            FROM classe
+            WHERE id = ${classe_id}
+        `;
+        const currentClassName = currentClass.rows[0]?.nom_de_la_classe;
+
+        const abonnement_id = abonnement.rows[0]?.id;
+        const carte_a_10_id = carte_a_10.rows[0]?.id;
+        const isDefaultClass =
+            abonnement.rows[0]?.default_classe_1_name === currentClassName ||
+            abonnement.rows[0]?.default_classe_2_name === currentClassName;
+        
+        console.log("isDefaultClass: ", isDefaultClass);
+        console.log("abonnement_id: ", abonnement_id);
+        console.log("carte_a_10_id: ", carte_a_10_id);
+        console.log("abonnement.rows[0]?.default_classe_1_name: ", abonnement.rows[0]?.default_classe_1_name);
+        console.log("abonnement.rows[0]?.default_classe_2_name: ", abonnement.rows[0]?.default_classe_2_name);
+        console.log("currentClassName: ", currentClassName);
+
+        if (isDefaultClass && abonnement_id) {
+            // Use abonnement
+            await addAttendee(classe_id, user_id, 'abonnement');
+            await updateClassSlots(classe_id);
+            await updateUsedCreditsThisWeek(abonnement_id);
+        } else if (carte_a_10_id && carte_a_10.rows[0]?.nombre_credits > 0) {
+            // Use carte_a_10
+            await addAttendee(classe_id, user_id, 'carte à 10');
+            await updateClassSlots(classe_id);
+            await updateNombreCredits(carte_a_10_id);
+            console.log('carte à 10');
+        } else {
+            return { message: 'You are not authorized to attend this class' };
+        }
 
         revalidatePath('/dashboard/classes');
         return { message: 'Presence added successfully' };
-    } catch (e) {
-        console.error(e);
-        return {
-            message: 'An error occurred while adding the presence',
-        };
+    } catch (error) {
+        console.error(error);
+        return { message: 'An error occurred while adding the presence' };
     }
 }
+
+async function updateNombreCredits(carte_a_10_id: any) {
+    await sql`
+                UPDATE carte_a_10
+                SET nombre_credits = nombre_credits - 1
+                WHERE id = ${carte_a_10_id}
+            `;
+    console.log('carte à 10 updated');
+}
+
+async function updateUsedCreditsThisWeek(abonnement_id: any) {
+    await sql`
+                UPDATE abonnements
+                SET used_credits_this_week = used_credits_this_week + 1
+                WHERE id = ${abonnement_id}
+            `;
+    console.log('used credits this week updated');
+}
+
+// Helper function to add attendee
+async function addAttendee(classe_id: number, user_id: string, product: string) {
+    await sql`
+        INSERT INTO attendees (classe_id, user_id, product)
+        VALUES (${classe_id}, ${user_id}, ${product})
+        ON CONFLICT (classe_id, user_id) DO NOTHING
+    `;
+    console.log('attendee added');
+}
+
+// Helper function to update class slots
+async function updateClassSlots(classe_id: number) {
+    await sql`
+        UPDATE classe
+        SET nombre_de_places_disponibles = nombre_de_places_disponibles - 1
+        WHERE id = ${classe_id}
+    `;
+    console.log('class slot updated');
+}
+
 
 // Add Profile schema
 const ProfileSchema = z.object({

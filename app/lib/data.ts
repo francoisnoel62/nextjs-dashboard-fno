@@ -342,7 +342,8 @@ export async function fetchFilteredAttendees(query: string, currentPage: number)
                    a.user_id,
                    u.name as user_name,
                    a.created_at as booking_date,
-                   ct.type_name as classe_type
+                   ct.type_name as classe_type,
+                a.product
             FROM attendees a
                      JOIN classe c ON a.classe_id = c.id
                      JOIN users u ON a.user_id = u.id

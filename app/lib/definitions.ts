@@ -105,4 +105,5 @@ export type AttendeesTable = {
   booking_date: string;
   user_id: string;
   user_name: string;
+  product: string;
 };
