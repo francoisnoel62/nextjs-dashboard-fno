@@ -46,10 +46,10 @@ export default async function AttendeesTable({
               <div className="flex items-center justify-between border-b pb-4">
                 <div>
                   <div className="mb-2 flex gap-2">
-                    <p><b className="mb-1">{attendeeItem.classe_name}</b></p>
-                  </div>
-                  <div className="mb-2 text-sm text-gray-500">
-                    <span className="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">{attendeeItem.product}</span>
+                    <div className="flex items-center gap-2">
+                      <p><b className="mb-1">{attendeeItem.classe_name}</b></p>
+                      <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">{attendeeItem.product}</span>
+                    </div>
                   </div>
                   <div className="mb-2">
                     <p><i>{formatDateToLocalFrance(attendeeItem.classe_date)}</i></p>
