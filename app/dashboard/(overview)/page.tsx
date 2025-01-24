@@ -8,10 +8,10 @@ import {LatestInvoicesSkeleton, RevenueChartSkeleton} from '@/app/ui/skeletons';
 
 export default async function Page() {
     const {
-        numberOfInvoices,
-        numberOfCustomers,
-        totalPaidInvoices,
-        totalPendingInvoices,
+        nombre_classes_par_semaine_value,
+        date_echeance_abonnement_value,
+        current_credits_value,
+        total_anciennes_cartes_value,
     } = await fetchCardData();
     return (
         <main>
@@ -19,14 +19,9 @@ export default async function Page() {
                 Dashboard
             </h1>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                <Card title="Collected" value={totalPaidInvoices} type="sub"/>
-                <Card title="Pending" value={totalPendingInvoices} type="sub"/>
-                <Card title="Total Invoices" value={numberOfInvoices} type="card"/>
-                <Card
-                    title="Total Customers"
-                    value={numberOfCustomers}
-                    type="card"
-                />
+                <Card title="Nombre de classes au total" value={nombre_classes_par_semaine_value} type="sub"/>
+                <Card title="Carte à 10 en cours" value={current_credits_value} type="card" text="crédits restants"/>
+                <Card title="Total cartes terminées" value={total_anciennes_cartes_value} type="card" text="anciennes cartes"/>
             </div>
             <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-4 lg:grid-cols-8">
                 <Suspense fallback={<RevenueChartSkeleton/>}>
