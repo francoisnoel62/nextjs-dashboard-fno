@@ -17,7 +17,7 @@ const links = [
     // {name: 'Home', href: '/dashboard', icon: HomeIcon},
     {name: 'Classes', href: '/dashboard/classes', icon: CalendarIcon},
     {name: 'Attendees', href: '/dashboard/attendees', icon: BookmarkIcon},
-    {name: 'Subscriptions', href: '/dashboard/bookings', icon: BookOpenIcon},
+    {name: 'Subscriptions', href: '/dashboard/subscriptions', icon: BookOpenIcon},
     // {
     //     name: 'Invoices',
     //     href: '/dashboard/invoices',

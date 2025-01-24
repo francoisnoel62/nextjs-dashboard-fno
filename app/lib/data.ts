@@ -54,30 +54,37 @@ export async function fetchCardData() {
         // You can probably combine these into a single SQL query
         // However, we are intentionally splitting them to demonstrate
         // how to initialize multiple queries in parallel with JS.
-        const invoiceCountPromise = sql`SELECT COUNT(*)
-                                        FROM invoices`;
-        const customerCountPromise = sql`SELECT COUNT(*)
-                                         FROM customers`;
-        const invoiceStatusPromise = sql`SELECT SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END)    AS "paid",
-                                                SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END) AS "pending"
-                                         FROM invoices`;
+        const nombre_classes_par_semaine = sql`SELECT nombre_classes_par_semaine
+                                        FROM abonnements`;
+        const date_echeance_abonnement = sql`
+            SELECT TO_CHAR(date_de_debut_contrat + INTERVAL '365 days', 'YYYY-MM-DD') as date_echeance_abonnement 
+            FROM abonnements`;
+        const current_credits = sql`SELECT nombre_credits
+                                         FROM carte_a_10
+                                         WHERE status = 'true'`;
+        const total_anciennes_cartes = sql`SELECT COUNT(*)
+                                                FROM carte_a_10
+                                                WHERE nombre_credits = 0`;
 
         const data = await Promise.all([
-            invoiceCountPromise,
-            customerCountPromise,
-            invoiceStatusPromise,
+            nombre_classes_par_semaine,
+            date_echeance_abonnement,
+            current_credits,
+            total_anciennes_cartes,
         ]);
 
-        const numberOfInvoices = Number(data[0].rows[0].count ?? '0');
-        const numberOfCustomers = Number(data[1].rows[0].count ?? '0');
-        const totalPaidInvoices = formatCurrency(data[2].rows[0].paid ?? '0');
-        const totalPendingInvoices = formatCurrency(data[2].rows[0].pending ?? '0');
+        const nombre_classes_par_semaine_value = data[0].rows[0].nombre_classes_par_semaine;
+        const date_echeance_abonnement_value = data[1].rows[0]?.date_echeance_abonnement 
+            ? new Date(data[1].rows[0].date_echeance_abonnement) 
+            : null;
+        const current_credits_value = data[2].rows[0].nombre_credits;
+        const total_anciennes_cartes_value = data[3].rows[0].count;
 
         return {
-            numberOfCustomers,
-            numberOfInvoices,
-            totalPaidInvoices,
-            totalPendingInvoices,
+            nombre_classes_par_semaine_value,
+            date_echeance_abonnement_value,
+            current_credits_value,
+            total_anciennes_cartes_value,
         };
     } catch (error) {
         console.error('Database Error:', error);
