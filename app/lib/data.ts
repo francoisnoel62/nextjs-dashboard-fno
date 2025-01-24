@@ -58,16 +58,6 @@ export async function fetchCardData() {
                                 WHERE user_id = ${userId}`;
     const profileId = profile.rows[0]?.id;
 
-    // If no profile exists, return default values
-    if (!profileId) {
-        return {
-            nombre_classes_par_semaine_value: 0,
-            date_echeance_abonnement_value: null,
-            current_credits_value: 0,
-            total_anciennes_cartes_value: 0,
-        };
-    }
-
     try {
         const nombre_classes_par_semaine = await sql`SELECT nombre_classes_par_semaine
                                         FROM abonnements
@@ -86,12 +76,12 @@ export async function fetchCardData() {
                                                 AND profile_id = ${profileId}`;
 
         return {
-            nombre_classes_par_semaine_value: nombre_classes_par_semaine.rows[0]?.nombre_classes_par_semaine ?? 0,
+            nombre_classes_par_semaine_value: nombre_classes_par_semaine.rows[0]?.nombre_classes_par_semaine ?? null,
             date_echeance_abonnement_value: date_echeance_abonnement.rows[0]?.date_echeance_abonnement
                 ? new Date(date_echeance_abonnement.rows[0].date_echeance_abonnement)
                 : null,
-            current_credits_value: current_credits.rows[0]?.nombre_credits ?? 0,
-            total_anciennes_cartes_value: parseInt(total_anciennes_cartes.rows[0]?.count ?? '0'),
+            current_credits_value: current_credits.rows[0]?.nombre_credits ?? null,
+            total_anciennes_cartes_value: parseInt(total_anciennes_cartes.rows[0]?.count ?? null),
         };
     } catch (error) {
         console.error('Database Error:', error);
