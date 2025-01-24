@@ -1,4 +1,4 @@
-import {sql} from '@vercel/postgres';
+import { sql } from '@vercel/postgres';
 import {
     CustomerField,
     CustomersTableType,
@@ -9,8 +9,8 @@ import {
     Revenue,
     Classes, AttendeesTable,
 } from './definitions';
-import {formatCurrency} from './utils';
-import {unstable_noStore as noStore} from "next/cache";
+import { formatCurrency } from './utils';
+import { unstable_noStore as noStore } from "next/cache";
 import { auth } from '@/auth';
 
 export async function fetchRevenue() {
@@ -50,41 +50,48 @@ export async function fetchLatestInvoices() {
 
 export async function fetchCardData() {
     noStore();
+    // Get the profile id of the current logged in user
+    const session = await auth();
+    const userId = session?.user?.id;
+    const profile = await sql`SELECT id
+                                FROM profiles
+                                WHERE user_id = ${userId}`;
+    const profileId = profile.rows[0]?.id;
+
+    // If no profile exists, return default values
+    if (!profileId) {
+        return {
+            nombre_classes_par_semaine_value: 0,
+            date_echeance_abonnement_value: null,
+            current_credits_value: 0,
+            total_anciennes_cartes_value: 0,
+        };
+    }
+
     try {
-        // You can probably combine these into a single SQL query
-        // However, we are intentionally splitting them to demonstrate
-        // how to initialize multiple queries in parallel with JS.
-        const nombre_classes_par_semaine = sql`SELECT nombre_classes_par_semaine
-                                        FROM abonnements`;
-        const date_echeance_abonnement = sql`
+        const nombre_classes_par_semaine = await sql`SELECT nombre_classes_par_semaine
+                                        FROM abonnements
+                                        WHERE profile_id = ${profileId}`;
+        const date_echeance_abonnement = await sql`
             SELECT TO_CHAR(date_de_debut_contrat + INTERVAL '365 days', 'YYYY-MM-DD') as date_echeance_abonnement 
-            FROM abonnements`;
-        const current_credits = sql`SELECT nombre_credits
+            FROM abonnements
+            WHERE profile_id = ${profileId}`;
+        const current_credits = await sql`SELECT nombre_credits
                                          FROM carte_a_10
-                                         WHERE status = 'true'`;
-        const total_anciennes_cartes = sql`SELECT COUNT(*)
+                                        WHERE status = 'true'
+                                         AND profile_id = ${profileId}`;
+        const total_anciennes_cartes = await sql`SELECT COUNT(*)
                                                 FROM carte_a_10
-                                                WHERE nombre_credits = 0`;
-
-        const data = await Promise.all([
-            nombre_classes_par_semaine,
-            date_echeance_abonnement,
-            current_credits,
-            total_anciennes_cartes,
-        ]);
-
-        const nombre_classes_par_semaine_value = data[0].rows[0].nombre_classes_par_semaine;
-        const date_echeance_abonnement_value = data[1].rows[0]?.date_echeance_abonnement 
-            ? new Date(data[1].rows[0].date_echeance_abonnement) 
-            : null;
-        const current_credits_value = data[2].rows[0].nombre_credits;
-        const total_anciennes_cartes_value = data[3].rows[0].count;
+                                                WHERE nombre_credits = 0
+                                                AND profile_id = ${profileId}`;
 
         return {
-            nombre_classes_par_semaine_value,
-            date_echeance_abonnement_value,
-            current_credits_value,
-            total_anciennes_cartes_value,
+            nombre_classes_par_semaine_value: nombre_classes_par_semaine.rows[0]?.nombre_classes_par_semaine ?? 0,
+            date_echeance_abonnement_value: date_echeance_abonnement.rows[0]?.date_echeance_abonnement
+                ? new Date(date_echeance_abonnement.rows[0].date_echeance_abonnement)
+                : null,
+            current_credits_value: current_credits.rows[0]?.nombre_credits ?? 0,
+            total_anciennes_cartes_value: parseInt(total_anciennes_cartes.rows[0]?.count ?? '0'),
         };
     } catch (error) {
         console.error('Database Error:', error);
