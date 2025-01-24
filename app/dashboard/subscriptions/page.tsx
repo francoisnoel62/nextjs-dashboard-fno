@@ -29,7 +29,7 @@ export default async function SubscriptionsPage() {
                     text={nombre_classes_par_semaine_value
                         ? "classes par semaine"
                         : "Pas d'abonnement en cours"} />
-                <Card title="Mon jour d'abonnement"
+                <Card title="Mon/mes jour(s) d'abonnement"
                     value={jour_abonnement_value
                         ? jour_abonnement_value
                         : ""}

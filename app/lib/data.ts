@@ -62,10 +62,15 @@ export async function fetchCardData() {
         const nombre_classes_par_semaine = await sql`SELECT nombre_classes_par_semaine
                                         FROM abonnements
                                         WHERE profile_id = ${profileId}`;
-        const jour_abonnement = await sql`
+        const jour_abonnement_1 = await sql`
             SELECT c.nom_de_la_classe
             FROM abonnements a
-            JOIN classe c ON a.default_classe = c.id
+            JOIN classe c ON a.default_classe_1 = c.id
+            WHERE a.profile_id = ${profileId}`;
+        const jour_abonnement_2 = await sql`
+            SELECT c.nom_de_la_classe
+            FROM abonnements a
+            JOIN classe c ON a.default_classe_2 = c.id
             WHERE a.profile_id = ${profileId}`;
         const date_echeance_abonnement = await sql`
             SELECT TO_CHAR(date_de_debut_contrat + INTERVAL '365 days', 'YYYY-MM-DD') as date_echeance_abonnement 
@@ -80,9 +85,15 @@ export async function fetchCardData() {
                                                 WHERE nombre_credits = 0
                                                 AND profile_id = ${profileId}`;
 
+        // Concatenate the jour_abonnement_1 and jour_abonnement_2
+        const jour_abonnement_value =
+            (jour_abonnement_1.rows[0]?.nom_de_la_classe || "") +
+            (jour_abonnement_2.rows[0]?.nom_de_la_classe ? " et " + jour_abonnement_2.rows[0].nom_de_la_classe : "");
+
+
         return {
             nombre_classes_par_semaine_value: nombre_classes_par_semaine.rows[0]?.nombre_classes_par_semaine ?? null,
-            jour_abonnement_value: jour_abonnement.rows[0]?.nom_de_la_classe ?? null,
+            jour_abonnement_value: jour_abonnement_value ?? null,
             date_echeance_abonnement_value: date_echeance_abonnement.rows[0]?.date_echeance_abonnement
                 ? new Date(date_echeance_abonnement.rows[0].date_echeance_abonnement)
                 : null,
