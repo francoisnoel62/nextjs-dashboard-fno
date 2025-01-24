@@ -80,8 +80,6 @@ export async function fetchCardData() {
                                                 WHERE nombre_credits = 0
                                                 AND profile_id = ${profileId}`;
 
-        console.log(jour_abonnement);
-
         return {
             nombre_classes_par_semaine_value: nombre_classes_par_semaine.rows[0]?.nombre_classes_par_semaine ?? null,
             jour_abonnement_value: jour_abonnement.rows[0]?.nom_de_la_classe ?? null,
