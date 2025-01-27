@@ -80,6 +80,14 @@ export type CustomerField = {
   name: string;
 };
 
+export type ClasseField = {
+  id: number;
+  nom_de_la_classe: string;
+  date_et_heure: string;
+  type_id: number;
+  nombre_de_places_disponibles: number;
+};
+
 export type InvoiceForm = {
   id: string;
   customer_id: string;
@@ -91,9 +99,18 @@ export type Classes = {
   id: number;
   nom_de_la_classe: string;
   type_id: number;
-  type: string;
   date_et_heure: string;
   nombre_de_places_disponibles: number;
+};
+
+export type ClasseTypes = {
+  id: number;
+  type_name: string;
+};
+
+export type ClasseTypeField = {
+  id: number;
+  type_name: string;
 };
 
 export type AttendeesTable = {

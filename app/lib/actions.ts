@@ -31,11 +31,22 @@ const ClassesShema = z.object({
     nom_de_la_classe: z.string(),
     type_id: z.number(),
     date_et_heure: z.string(),
-    nombre_de_places: z.number(),
+    nombre_de_places_disponibles: z.number(),
 });
 
-const CreateClass = ClassesShema.omit({ id: true });
-const UpdateClass = ClassesShema.omit({ id: true });
+// const CreateClass = ClassesShema.omit({ id: true });
+const CreateClass = z.object({
+    nom_de_la_classe: z.string(),
+    date_et_heure: z.string(),
+    type_id: z.string().transform((val) => parseInt(val, 10)),
+    nombre_de_places_disponibles: z.string().transform((val) => parseInt(val, 10))
+});
+const UpdateClass = z.object({
+    nom_de_la_classe: z.string(),
+    type_id: z.string().transform((val) => parseInt(val, 10)),
+    date_et_heure: z.string(),
+    nombre_de_places_disponibles: z.string().transform((val) => parseInt(val, 10))
+});
 
 export async function updateInvoice(id: string, formData: FormData): Promise<void> {
     const { customerId, amount, status } = UpdateInvoice.parse({
@@ -177,23 +188,22 @@ export async function deleteClass(id: number) {
     }
 }
 
-export async function createClass(formData: FormData) {
-    const { nom_de_la_classe, date_et_heure, type_id, nombre_de_places } = CreateClass.parse({
-        nom_de_la_classe: formData.get('nom_de_la_classe'),
-        date_et_heure: formData.get('date_et_heure'),
-        type_id: formData.get('type_id'),
-        nombre_de_places: formData.get('nombre_de_places'),
+export async function createClass(formData: FormData): Promise<void> {
+    console.log('formData: ', formData);
+    const { nom_de_la_classe, date_et_heure, type_id, nombre_de_places_disponibles } = CreateClass.parse({
+        nom_de_la_classe: formData.get('classe'),
+        date_et_heure: formData.get('date'),
+        type_id: formData.get('typeId'),
+        nombre_de_places_disponibles: formData.get('seats'),
     });
 
     try {
         await sql`
-            INSERT INTO classe (nom_de_la_classe, date_et_heure, type_id, nombre_de_places)
-            VALUES (${nom_de_la_classe}, ${date_et_heure}, ${type_id}, ${nombre_de_places})
+            INSERT INTO classe (nom_de_la_classe, date_et_heure, type_id, nombre_de_places_disponibles)
+            VALUES (${nom_de_la_classe}, ${date_et_heure}, ${type_id}, ${nombre_de_places_disponibles})
         `;
     } catch (e) {
-        return {
-            message: 'An error occurred while creating the class',
-        }
+        throw new Error('An error occurred while creating the class');
     }
 
     revalidatePath('/dashboard/classes');
@@ -201,17 +211,17 @@ export async function createClass(formData: FormData) {
 }
 
 export async function updateClass(id: string, formData: FormData) {
-    const { nom_de_la_classe, type_id, date_et_heure, nombre_de_places } = UpdateClass.parse({
+    const { nom_de_la_classe, type_id, date_et_heure, nombre_de_places_disponibles } = UpdateClass.parse({
         nom_de_la_classe: formData.get('nom_de_la_classe'),
         type_id: formData.get('type_id'),
         date_et_heure: formData.get('date_et_heure'),
-        nombre_de_places: formData.get('nombre_de_places'),
+        nombre_de_places_disponibles: formData.get('nombre_de_places_disponibles'),
     });
 
     try {
         await sql`
             UPDATE classe
-            SET nom_de_la_classe = ${nom_de_la_classe}, type_id = ${type_id}, date_et_heure = ${date_et_heure}, nombre_de_places = ${nombre_de_places}
+            SET nom_de_la_classe = ${nom_de_la_classe}, type_id = ${type_id}, date_et_heure = ${date_et_heure}, nombre_de_places_disponibles = ${nombre_de_places_disponibles}
             WHERE id = ${id}
         `;
     } catch (e) {

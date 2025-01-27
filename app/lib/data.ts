@@ -8,10 +8,12 @@ import {
     User,
     Revenue,
     Classes, AttendeesTable,
+    ClasseTypes,
 } from './definitions';
 import { formatCurrency } from './utils';
 import { unstable_noStore as noStore } from "next/cache";
 import { auth } from '@/auth';
+
 
 export async function fetchRevenue() {
     // Add noStore() here to prevent the response from being cached.
@@ -194,6 +196,42 @@ export async function fetchInvoiceById(id: string) {
     } catch (error) {
         console.error('Database Error:', error);
         throw new Error('Failed to fetch invoice.');
+    }
+}
+
+export async function fetchClasses() {
+    try {
+        const data = await sql<Classes>`
+            SELECT id,
+                   nom_de_la_classe,
+                     date_et_heure,
+                        type_id,
+                        nombre_de_places_disponibles
+            FROM classes
+            ORDER BY date_et_heure
+        `;
+
+        const classes = data.rows;
+        return classes;
+    } catch (err) {
+        console.error('Database Error:', err);
+        throw new Error('Failed to fetch all classes.');
+    }
+}
+
+export async function fetchTypes() {
+    try {
+        const data = await sql<ClasseTypes>`
+            SELECT id, type_name
+            FROM classetype
+            ORDER BY id ASC
+        `;
+
+        const types = data.rows;
+        return types;
+    } catch (error) {
+        console.error('Failed to fetch types:', error);
+        throw new Error('Failed to fetch types.');
     }
 }
 
