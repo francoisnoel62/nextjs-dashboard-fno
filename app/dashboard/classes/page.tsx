@@ -6,6 +6,7 @@ import {ClassesTableSkeleton} from '@/app/ui/skeletons';
 import {Suspense} from 'react';
 import { fetchClassesPages } from '@/app/lib/data';
 import { CreateClass } from '@/app/ui/classes/buttons';
+import { auth } from '@/auth';
 
 export default async function Page(
     props: {
@@ -20,6 +21,8 @@ export default async function Page(
     const currentPage = Number(searchParams?.page) || 1;
 
     const totalPages = await fetchClassesPages(query);
+    const session = await auth();
+    const user = session?.user;
 
     return (
         <div className="w-full">
@@ -28,7 +31,7 @@ export default async function Page(
             </div>
             <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
                 <Search placeholder="Search classes..."/>
-                {/* <CreateClass /> */}
+                {user && user.email === 'info@denzali.ch' && <CreateClass />}
             </div>
             <Suspense key={query + currentPage} fallback={<ClassesTableSkeleton/>}>
                 <Table query={query} currentPage={currentPage}/>
