@@ -99,6 +99,7 @@ export type Classes = {
   id: number;
   nom_de_la_classe: string;
   type_id: number;
+  type: string;
   date_et_heure: string;
   nombre_de_places_disponibles: number;
 };
