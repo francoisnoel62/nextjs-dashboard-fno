@@ -5,6 +5,8 @@ import {lusitana} from '@/app/ui/fonts';
 import {AttendeesTableSkeleton} from '@/app/ui/skeletons';
 import {Suspense} from 'react';
 import { fetchAttendeesPages } from '@/app/lib/data';
+import { auth } from '@/auth';
+import PrintAttendees from '@/app/dashboard/attendees/print-attendees';
 
 export default async function Page(
     props: {
@@ -19,6 +21,8 @@ export default async function Page(
     const currentPage = Number(searchParams?.page) || 1;
 
     const totalPages = await fetchAttendeesPages(query);
+    const session = await auth();
+    const user = session?.user;
 
     return (
         <div className="w-full">
@@ -27,6 +31,7 @@ export default async function Page(
             </div>
             <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
                 <Search placeholder="Search attendees..."/>
+                {user && user.email === 'patoune@gmail.com' && <PrintAttendees />}
             </div>
             <Suspense key={query + currentPage} fallback={<AttendeesTableSkeleton/>}>
                 <Table query={query} currentPage={currentPage}/>

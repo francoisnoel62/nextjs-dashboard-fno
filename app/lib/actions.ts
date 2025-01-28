@@ -483,3 +483,105 @@ export async function createOrUpdateProfile(formData: FormData) {
 
   redirect('/dashboard/profil');
 }
+
+import { PDFDocument, rgb } from 'pdf-lib';
+import { formatDateToLocalFrance } from '@/app/lib/utils';
+
+export async function generateAttendeesReport() {
+  try {
+    const currentDate = new Date();
+    const startOfWeek = new Date(currentDate);
+    startOfWeek.setDate(currentDate.getDate() - currentDate.getDay() + 1); // Monday
+    const endOfWeek = new Date(currentDate);
+    endOfWeek.setDate(currentDate.getDate() - currentDate.getDay() + 7); // Sunday
+
+    // Format dates for SQL query
+    const startDate = startOfWeek.toISOString().split('T')[0];
+    const endDate = endOfWeek.toISOString().split('T')[0];
+
+    const attendees = await sql`
+      SELECT 
+        a.id,
+        c.nom_de_la_classe as classe_name,
+        c.date_et_heure as classe_date,
+        p.first_name,
+        p.last_name,
+        a.product
+      FROM attendees a
+      JOIN classe c ON a.classe_id = c.id
+      JOIN users u ON a.user_id = u.id
+      JOIN profiles p ON u.id = p.user_id
+      WHERE DATE(c.date_et_heure) BETWEEN ${startDate} AND ${endDate}
+      ORDER BY c.date_et_heure ASC
+    `;
+
+    // Create PDF document
+    const pdfDoc = await PDFDocument.create();
+    const page = pdfDoc.addPage();
+    const { width, height } = page.getSize();
+    
+    // Add title
+    page.drawText('Presence de la semaine', {
+      x: width / 2 - 100,
+      y: height - 50,
+      size: 20,
+    });
+
+    page.drawText(`Semaine du : ${formatDateToLocalFrance(startDate)} au ${formatDateToLocalFrance(endDate)}`, {
+        x: width / 2 - 110,
+      y: height - 80,
+      size: 12,
+    });
+
+    // Group attendees by date
+    const attendeesByDate = attendees.rows.reduce((acc, attendee) => {
+      const date = new Date(attendee.classe_date).toISOString().split('T')[0];
+      if (!acc[date]) {
+        acc[date] = [];
+      }
+      acc[date].push(attendee);
+      return acc;
+    }, {});
+
+    let yPosition = height - 120;
+
+    // Add attendees to PDF
+    for (const [date, dateAttendees] of Object.entries(attendeesByDate)) {
+      // Add date header with day name
+      const dateObj = new Date(date);
+      const dayName = dateObj.toLocaleDateString('fr-FR', { weekday: 'long' });
+      page.drawText(`${dayName}, ${formatDateToLocalFrance(date)}`, {
+        x: 50,
+        y: yPosition,
+        size: 14,
+      });
+      yPosition -= 30;
+
+      // Add attendees for this date
+      for (const attendee of dateAttendees) {
+        if (yPosition < 50) {
+          // Add new page if we're running out of space
+          const newPage = pdfDoc.addPage();
+          yPosition = height - 50;
+        }
+
+        const attendeeText = `${attendee.classe_name} - ${attendee.first_name} ${attendee.last_name} (${attendee.product})`;
+        page.drawText(attendeeText, {
+          x: 70,
+          y: yPosition,
+          size: 10,
+        });
+        yPosition -= 20;
+      }
+      yPosition -= 20; // Add space between dates
+    }
+
+    // Save PDF
+    const pdfBytes = await pdfDoc.save();
+    return pdfBytes;
+
+  } catch (error) {
+    console.error('Error generating attendees report:', error);
+    throw new Error('Failed to generate attendees report');
+  }
+}
