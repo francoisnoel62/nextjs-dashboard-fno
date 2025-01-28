@@ -31,7 +31,7 @@ export default async function Page(
             </div>
             <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
                 <Search placeholder="Search classes..."/>
-                {user && user.email === 'info@denzali.ch' && <CreateClass />}
+                {user && user.email === process.env.DZ_EMAIL && <CreateClass />}
             </div>
             <Suspense key={query + currentPage} fallback={<ClassesTableSkeleton/>}>
                 <Table query={query} currentPage={currentPage}/>
