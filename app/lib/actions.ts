@@ -14,6 +14,7 @@ import { formatDateToLocalFrance } from '@/app/lib/utils';
 import { resend } from './resend';
 import NewBooking from '@/emails/NewBooking';
 import { AttendeesTable } from './definitions';
+import CancelBookingEmail from '@/emails/CancelBooking';
 
 
 
@@ -317,13 +318,20 @@ export async function deleteAttendee(id: string) {
     try {
         // Get attendee details including product type and user_id
         const attendee = await sql`
-            SELECT classe_id, product, user_id FROM attendees
-            WHERE id = ${id}
+            SELECT
+            c.date_et_heure as classe_date,
+            c.nom_de_la_classe as classe_name, 
+            a.product, 
+            u.name as user_name
+            FROM attendees a
+            JOIN classe c ON a.classe_id = c.id
+            JOIN users u ON a.user_id = u.id
+            WHERE a.id = ${id}
         `;
-        const { classe_id, product, user_id } = attendee.rows[0];
+        const attendee_obj = attendee.rows[0] as AttendeesTable;
 
         // If product is 'carte à 10', increment credits
-        if (product === 'carte à 10') {
+        if (attendee_obj.product === 'carte à 10') {
             await sql`
                 UPDATE carte_a_10
                 SET nombre_credits = nombre_credits + 1
@@ -335,7 +343,7 @@ export async function deleteAttendee(id: string) {
         await sql`
             UPDATE classe
             SET nombre_de_places_disponibles = nombre_de_places_disponibles + 1
-            WHERE id = ${classe_id}
+            WHERE id = ${attendee_obj.classe_id}
         `;
 
         // Delete the attendee
@@ -343,6 +351,18 @@ export async function deleteAttendee(id: string) {
             DELETE FROM attendees
             WHERE id = ${id}
         `;
+
+        const formattedDate = formatDateToLocalFrance(attendee.rows[0].classe_date);
+
+        const { data, error } = await resend.emails.send({
+                from: "do-not-answer@mydenzali.fr",
+                to: "info@denzali.ch",
+                subject: "Annulation d'une réservation",
+                react: CancelBookingEmail({
+                    ...attendee_obj,
+                    classe_date: formattedDate
+                })
+            })
 
         revalidatePath('/dashboard/attendees');
         return { message: 'Attendee deleted successfully' };
@@ -452,8 +472,7 @@ export async function addPresence(classe_id: number) {
                     classe_date: formattedDate
                 })
             })
-            console.log("data", data);
-            console.log("error", error);
+            
         } else {
             throw new Error('Attendee data not found to send an email');
         }
