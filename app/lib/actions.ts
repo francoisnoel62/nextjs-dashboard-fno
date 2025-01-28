@@ -352,7 +352,7 @@ export async function addPresence(classe_id: number) {
         const isDefaultClass =
             abonnement.rows[0]?.default_classe_1_name === currentClassName ||
             abonnement.rows[0]?.default_classe_2_name === currentClassName;
-        
+
         console.log("isDefaultClass: ", isDefaultClass);
         console.log("abonnement_id: ", abonnement_id);
         console.log("carte_a_10_id: ", carte_a_10_id);
@@ -424,41 +424,41 @@ async function updateClassSlots(classe_id: number) {
 
 // Add Profile schema
 const ProfileSchema = z.object({
-  first_name: z.string().min(1, 'First name is required'),
-  last_name: z.string().min(1, 'Last name is required'),
-  address: z.string().min(1, 'Address is required'),
-  telephone: z.string().min(1, 'Telephone is required'),
-  date_of_birth: z.string().min(1, 'Date of birth is required'),
+    first_name: z.string().min(1, 'First name is required'),
+    last_name: z.string().min(1, 'Last name is required'),
+    address: z.string().min(1, 'Address is required'),
+    telephone: z.string().min(1, 'Telephone is required'),
+    date_of_birth: z.string().min(1, 'Date of birth is required'),
 });
 
 export async function createOrUpdateProfile(formData: FormData) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    throw new Error('Unauthorized');
-  }
+    const session = await auth();
+    if (!session?.user?.id) {
+        throw new Error('Unauthorized');
+    }
 
-  const validatedFields = ProfileSchema.safeParse({
-    first_name: formData.get('first_name'),
-    last_name: formData.get('last_name'),
-    address: formData.get('address'),
-    telephone: formData.get('telephone'),
-    date_of_birth: formData.get('date_of_birth'),
-  });
+    const validatedFields = ProfileSchema.safeParse({
+        first_name: formData.get('first_name'),
+        last_name: formData.get('last_name'),
+        address: formData.get('address'),
+        telephone: formData.get('telephone'),
+        date_of_birth: formData.get('date_of_birth'),
+    });
 
-  if (!validatedFields.success) {
-    throw new Error('Invalid form data');
-  }
+    if (!validatedFields.success) {
+        throw new Error('Invalid form data');
+    }
 
-  const { first_name, last_name, address, telephone, date_of_birth } = validatedFields.data;
-  const userId = session.user.id;
+    const { first_name, last_name, address, telephone, date_of_birth } = validatedFields.data;
+    const userId = session.user.id;
 
-  try {
-    const existingProfile = await sql`
+    try {
+        const existingProfile = await sql`
       SELECT id FROM profiles WHERE user_id = ${userId}
     `;
 
-    if (existingProfile.rows.length > 0) {
-      await sql`
+        if (existingProfile.rows.length > 0) {
+            await sql`
         UPDATE profiles
         SET first_name = ${first_name},
             last_name = ${last_name},
@@ -468,38 +468,38 @@ export async function createOrUpdateProfile(formData: FormData) {
             updated_at = CURRENT_TIMESTAMP
         WHERE user_id = ${userId}
       `;
-    } else {
-      await sql`
+        } else {
+            await sql`
         INSERT INTO profiles (user_id, first_name, last_name, address, telephone, date_of_birth)
         VALUES (${userId}, ${first_name}, ${last_name}, ${address}, ${telephone}, ${date_of_birth}::date)
       `;
+        }
+
+        revalidatePath('/dashboard/profil');
+    } catch (error) {
+        console.error('Profile save error:', error);
+        throw new Error('Failed to save profile.');
     }
 
-    revalidatePath('/dashboard/profil');
-  } catch (error) {
-    console.error('Profile save error:', error);
-    throw new Error('Failed to save profile.');
-  }
-
-  redirect('/dashboard/profil');
+    redirect('/dashboard/profil');
 }
 
-import { PDFDocument, rgb } from 'pdf-lib';
+import { PDFDocument, PDFPage, rgb } from 'pdf-lib';
 import { formatDateToLocalFrance } from '@/app/lib/utils';
 
 export async function generateAttendeesReport() {
-  try {
-    const currentDate = new Date();
-    const startOfWeek = new Date(currentDate);
-    startOfWeek.setDate(currentDate.getDate() - currentDate.getDay() + 1); // Monday
-    const endOfWeek = new Date(currentDate);
-    endOfWeek.setDate(currentDate.getDate() - currentDate.getDay() + 7); // Sunday
+    try {
+        const currentDate = new Date();
+        const startOfWeek = new Date(currentDate);
+        startOfWeek.setDate(currentDate.getDate() - currentDate.getDay() + 1); // Monday
+        const endOfWeek = new Date(currentDate);
+        endOfWeek.setDate(currentDate.getDate() - currentDate.getDay() + 7); // Sunday
 
-    // Format dates for SQL query
-    const startDate = startOfWeek.toISOString().split('T')[0];
-    const endDate = endOfWeek.toISOString().split('T')[0];
+        // Format dates for SQL query
+        const startDate = startOfWeek.toISOString().split('T')[0];
+        const endDate = endOfWeek.toISOString().split('T')[0];
 
-    const attendees = await sql`
+        const attendees = await sql`
       SELECT 
         a.id,
         c.nom_de_la_classe as classe_name,
@@ -515,73 +515,105 @@ export async function generateAttendeesReport() {
       ORDER BY c.date_et_heure ASC
     `;
 
-    // Create PDF document
-    const pdfDoc = await PDFDocument.create();
-    const page = pdfDoc.addPage();
-    const { width, height } = page.getSize();
-    
-    // Add title
-    page.drawText('Presence de la semaine', {
-      x: width / 2 - 100,
-      y: height - 50,
-      size: 20,
-    });
+        // Create PDF document
+        const pdfDoc = await PDFDocument.create();
+        const page = pdfDoc.addPage();
+        const { width, height } = page.getSize();
 
-    page.drawText(`Semaine du : ${formatDateToLocalFrance(startDate)} au ${formatDateToLocalFrance(endDate)}`, {
-        x: width / 2 - 110,
-      y: height - 80,
-      size: 12,
-    });
+        // Add title
+        page.drawText('Presence de la semaine', {
+            x: width / 2 - 100,
+            y: height - 50,
+            size: 20,
+        });
 
-    // Group attendees by date
-    const attendeesByDate = attendees.rows.reduce((acc, attendee) => {
-      const date = new Date(attendee.classe_date).toISOString().split('T')[0];
-      if (!acc[date]) {
-        acc[date] = [];
-      }
-      acc[date].push(attendee);
-      return acc;
-    }, {});
+        page.drawText(`Semaine du : ${formatDateToLocalFrance(startDate)} au ${formatDateToLocalFrance(endDate)}`, {
+            x: width / 2 - 110,
+            y: height - 80,
+            size: 12,
+        });
 
-    let yPosition = height - 120;
+        // Group attendees by date
+        const attendeesByDate = attendees.rows.reduce((acc, attendee) => {
+            const date = new Date(attendee.classe_date).toISOString().split('T')[0];
+            if (!acc[date]) {
+                acc[date] = [];
+            }
+            acc[date].push(attendee);
+            return acc;
+        }, {});
 
-    // Add attendees to PDF
-    for (const [date, dateAttendees] of Object.entries(attendeesByDate)) {
-      // Add date header with day name
-      const dateObj = new Date(date);
-      const dayName = dateObj.toLocaleDateString('fr-FR', { weekday: 'long' });
-      page.drawText(`${dayName}, ${formatDateToLocalFrance(date)}`, {
-        x: 50,
-        y: yPosition,
-        size: 14,
-      });
-      yPosition -= 30;
+        let yPosition = height - 120;
 
-      // Add attendees for this date
-      for (const attendee of dateAttendees) {
-        if (yPosition < 50) {
-          // Add new page if we're running out of space
-          const newPage = pdfDoc.addPage();
-          yPosition = height - 50;
+        // Add attendees to PDF
+        for (const [date, dateAttendees] of Object.entries(attendeesByDate)) {
+            // Add date header with day name
+            const dateObj = new Date(date);
+            const dayName = dateObj.toLocaleDateString('fr-FR', { weekday: 'long' });
+            page.drawText(`${dayName}, ${formatDateToLocalFrance(date)}`, {
+                x: 50,
+                y: yPosition,
+                size: 14,
+            });
+            yPosition -= 30;
+
+            // Add attendees for this date
+            for (const attendee of dateAttendees) {
+                if (yPosition < 50) {
+                    // Add new page if we're running out of space
+                    const newPage = pdfDoc.addPage();
+                    yPosition = height - 50;
+                }
+
+                const attendeeText = `${attendee.classe_name} - ${attendee.first_name} ${attendee.last_name} (${attendee.product})`;
+                page.drawText(attendeeText, {
+                    x: 70,
+                    y: yPosition,
+                    size: 10,
+                });
+                yPosition -= 20;
+            }
+            yPosition -= 20; // Add space between dates
+
+            // Add "Moniteurs :" after each date
+            addMoniteurs(page, yPosition);
+            yPosition -= 90; // Add space after "Moniteurs :"
         }
 
-        const attendeeText = `${attendee.classe_name} - ${attendee.first_name} ${attendee.last_name} (${attendee.product})`;
-        page.drawText(attendeeText, {
-          x: 70,
-          y: yPosition,
-          size: 10,
-        });
-        yPosition -= 20;
-      }
-      yPosition -= 20; // Add space between dates
+        // Save PDF
+        const pdfBytes = await pdfDoc.save();
+        return pdfBytes;
+
+    } catch (error) {
+        console.error('Error generating attendees report:', error);
+        throw new Error('Failed to generate attendees report');
     }
 
-    // Save PDF
-    const pdfBytes = await pdfDoc.save();
-    return pdfBytes;
+    function addMoniteurs(page: PDFPage, yPosition: number): void {
+        page.drawText('Moniteurs :', {
+            x: 50,
+            y: yPosition,
+            size: 14,
+        });
 
-  } catch (error) {
-    console.error('Error generating attendees report:', error);
-    throw new Error('Failed to generate attendees report');
-  }
+        // Add -> 17h30 : ......
+        page.drawText('17h30 : ....', {
+            x: 70,
+            y: yPosition - 30,
+            size: 10,
+        });
+
+        // Add -> 19h00
+        page.drawText('19h00 : ....', {
+            x: 70,
+            y: yPosition - 50,
+            size: 10,
+        });
+
+        page.drawText('-----------------------------------------------------------------------------', {
+            x: 20,
+            y: yPosition - 70,
+            size: 10,
+        });
+    }
 }
