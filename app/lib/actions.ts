@@ -9,6 +9,11 @@ import { AuthError } from 'next-auth';
 import bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import { auth } from "@/auth"
+import { PDFDocument, PDFPage, StandardFonts } from 'pdf-lib';
+import { formatDateToLocalFrance } from '@/app/lib/utils';
+import { resend } from './resend';
+import NewBooking from '@/emails/NewBooking';
+import { AttendeesTable } from './definitions';
 
 
 
@@ -181,7 +186,7 @@ export async function changePassword(
     prevState: string | undefined,
     formData: FormData,
 ): Promise<string | undefined> {
-    
+
     try {
         const validatedFields = ChangePasswordSchema.safeParse({
             email: formData.get('email'),
@@ -352,6 +357,8 @@ export async function deleteAttendee(id: string) {
 
 export async function addPresence(classe_id: number) {
     try {
+        let the_attendee_obj = null;
+        let the_attendee = null;
         // Authenticate user and get user ID
         const session = await auth();
         const user_id = session?.user?.id;
@@ -418,29 +425,38 @@ export async function addPresence(classe_id: number) {
             abonnement.rows[0]?.default_classe_1_name === currentClassName ||
             abonnement.rows[0]?.default_classe_2_name === currentClassName;
 
-        console.log("isDefaultClass: ", isDefaultClass);
-        console.log("abonnement_id: ", abonnement_id);
-        console.log("carte_a_10_id: ", carte_a_10_id);
-        console.log("abonnement.rows[0]?.default_classe_1_name: ", abonnement.rows[0]?.default_classe_1_name);
-        console.log("abonnement.rows[0]?.default_classe_2_name: ", abonnement.rows[0]?.default_classe_2_name);
-        console.log("currentClassName: ", currentClassName);
-
         if (isDefaultClass && abonnement_id) {
             // Use abonnement
-            await addAttendee(classe_id, user_id, 'abonnement');
+            the_attendee_obj = await addAttendee(classe_id, user_id, 'abonnement');
             await updateClassSlots(classe_id);
             await updateUsedCreditsThisWeek(abonnement_id);
         } else if (carte_a_10_id && carte_a_10.rows[0]?.nombre_credits > 0) {
             // Use carte_a_10
-            await addAttendee(classe_id, user_id, 'carte à 10');
+            the_attendee_obj = await addAttendee(classe_id, user_id, 'carte à 10');
             await updateClassSlots(classe_id);
             await updateNombreCredits(carte_a_10_id);
-            console.log('carte à 10');
         } else {
             return { message: 'You are not authorized to attend this class' };
         }
-
         revalidatePath('/dashboard/classes');
+
+        const formattedDate = formatDateToLocalFrance(the_attendee_obj.classe_date);
+
+        if (the_attendee_obj) {
+            const { data, error } = await resend.emails.send({
+                from: "do-not-answer@mydenzali.fr",
+                to: "info@denzali.ch",
+                subject: "Nouvelle réservation",
+                react: NewBooking({
+                    ...the_attendee_obj,
+                    classe_date: formattedDate
+                })
+            })
+            console.log("data", data);
+            console.log("error", error);
+        } else {
+            throw new Error('Attendee data not found to send an email');
+        }
         return { message: 'Presence added successfully' };
     } catch (error) {
         console.error(error);
@@ -468,12 +484,20 @@ async function updateUsedCreditsThisWeek(abonnement_id: any) {
 
 // Helper function to add attendee
 async function addAttendee(classe_id: number, user_id: string, product: string) {
-    await sql`
+    let result = await sql`
         INSERT INTO attendees (classe_id, user_id, product)
         VALUES (${classe_id}, ${user_id}, ${product})
         ON CONFLICT (classe_id, user_id) DO NOTHING
+        RETURNING 
+            attendees.id,
+            attendees.product,
+            (SELECT nom_de_la_classe FROM classe WHERE id = ${classe_id}) as classe_name,
+            (SELECT date_et_heure FROM classe WHERE id = ${classe_id}) as classe_date,
+            (SELECT name FROM users WHERE id = ${user_id}) as user_name
     `;
     console.log('attendee added');
+
+    return result.rows[0] as AttendeesTable;
 }
 
 // Helper function to update class slots
@@ -549,9 +573,6 @@ export async function createOrUpdateProfile(formData: FormData) {
     redirect('/dashboard/profil');
 }
 
-import { PDFDocument, PDFPage, StandardFonts} from 'pdf-lib';
-import { formatDateToLocalFrance } from '@/app/lib/utils';
-
 export async function generateAttendeesReport() {
     try {
         const currentDate = new Date();
@@ -565,19 +586,19 @@ export async function generateAttendeesReport() {
         const endDate = endOfWeek.toISOString().split('T')[0];
 
         const attendees = await sql`
-      SELECT 
-        a.id,
-        c.nom_de_la_classe as classe_name,
-        c.date_et_heure as classe_date,
-        p.first_name,
-        p.last_name,
-        a.product
-      FROM attendees a
-      JOIN classe c ON a.classe_id = c.id
-      JOIN users u ON a.user_id = u.id
-      JOIN profiles p ON u.id = p.user_id
-      WHERE DATE(c.date_et_heure) BETWEEN ${startDate} AND ${endDate}
-      ORDER BY c.date_et_heure ASC
+            SELECT 
+                a.id,
+                c.nom_de_la_classe as classe_name,
+                c.date_et_heure as classe_date,
+                p.first_name,
+                p.last_name,
+                a.product
+            FROM attendees a
+            JOIN classe c ON a.classe_id = c.id
+            JOIN users u ON a.user_id = u.id
+            JOIN profiles p ON u.id = p.user_id
+            WHERE DATE(c.date_et_heure) BETWEEN ${startDate} AND ${endDate}
+            ORDER BY c.date_et_heure ASC
     `;
 
         // Create PDF document
