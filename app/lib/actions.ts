@@ -169,6 +169,74 @@ export async function register(
     redirect('/login');
 }
 
+// In actions.ts, add this new function:
+const ChangePasswordSchema = z.object({
+    email: z.string().email(),
+    currentPassword: z.string().min(6),
+    newPassword: z.string().min(6),
+    confirmNewPassword: z.string().min(6),
+});
+
+export async function changePassword(
+    prevState: string | undefined,
+    formData: FormData,
+): Promise<string | undefined> {
+    
+    try {
+        const validatedFields = ChangePasswordSchema.safeParse({
+            email: formData.get('email'),
+            currentPassword: formData.get('currentPassword'),
+            newPassword: formData.get('newPassword'),
+            confirmNewPassword: formData.get('confirmNewPassword'),
+        });
+
+        if (!validatedFields.success) {
+            return 'Invalid form data. Please check your inputs.';
+        }
+
+        const { email, currentPassword, newPassword, confirmNewPassword } = validatedFields.data;
+
+        if (newPassword !== confirmNewPassword) {
+            return "New passwords don't match.";
+        }
+
+        const user = await sql`
+            SELECT id FROM users
+            WHERE email = ${email}
+        `;
+
+        const user_id = user.rows[0]?.id;
+
+        // Get user and verify current password
+        if (!user) {
+            return 'User not found.';
+        }
+
+        const password = await sql`
+            SELECT password FROM users
+            WHERE id = ${user_id}
+        `;
+
+        const passwordMatches = await bcrypt.compare(currentPassword, password.rows[0].password);
+        if (!passwordMatches) {
+            return 'Current password is incorrect.';
+        }
+
+        // Hash and update new password
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+        await sql`
+            UPDATE users
+            SET password = ${hashedNewPassword}
+            WHERE email = ${email}
+        `;
+
+        return 'Password changed successfully!';
+    } catch (error) {
+        console.error('Password change error:', error);
+        return 'An error occurred while changing the password.';
+    }
+}
+
 export async function deleteClass(id: number) {
 
     try {
