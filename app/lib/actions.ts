@@ -7,10 +7,7 @@ import { redirect } from "next/navigation";
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
 import bcrypt from 'bcrypt';
-// import { v4 as uuidv4 } from 'uuid';
 import { v4 as uuidv4 } from 'uuid';
-import { use } from 'react';
-import { UUID } from 'crypto';
 import { auth } from "@/auth"
 
 
@@ -484,7 +481,7 @@ export async function createOrUpdateProfile(formData: FormData) {
     redirect('/dashboard/profil');
 }
 
-import { PDFDocument, PDFPage, rgb } from 'pdf-lib';
+import { PDFDocument, PDFPage, StandardFonts} from 'pdf-lib';
 import { formatDateToLocalFrance } from '@/app/lib/utils';
 
 export async function generateAttendeesReport() {
@@ -554,6 +551,7 @@ export async function generateAttendeesReport() {
                 x: 50,
                 y: yPosition,
                 size: 14,
+                font: page.doc.embedStandardFont(StandardFonts.HelveticaBold),
             });
             yPosition -= 30;
 
@@ -565,7 +563,7 @@ export async function generateAttendeesReport() {
                     yPosition = height - 50;
                 }
 
-                const attendeeText = `${attendee.classe_name} - ${attendee.first_name} ${attendee.last_name} (${attendee.product})`;
+                const attendeeText = `${attendee.classe_name} // ${attendee.first_name} ${attendee.last_name} (${attendee.product})`;
                 page.drawText(attendeeText, {
                     x: 70,
                     y: yPosition,
@@ -593,27 +591,31 @@ export async function generateAttendeesReport() {
         page.drawText('Moniteurs :', {
             x: 50,
             y: yPosition,
-            size: 14,
+            size: 10,
+            font: page.doc.embedStandardFont(StandardFonts.HelveticaOblique),
         });
 
         // Add -> 17h30 : ......
         page.drawText('17h30 : ....', {
             x: 70,
-            y: yPosition - 30,
+            y: yPosition - 20,
             size: 10,
+            font: page.doc.embedStandardFont(StandardFonts.HelveticaOblique),
         });
 
         // Add -> 19h00
         page.drawText('19h00 : ....', {
             x: 70,
-            y: yPosition - 50,
+            y: yPosition - 40,
             size: 10,
+            font: page.doc.embedStandardFont(StandardFonts.HelveticaOblique),
         });
 
-        page.drawText('-----------------------------------------------------------------------------', {
+        page.drawText('-----------------------------------------------------------------------------------------------------------------------------------------------------------------------', {
             x: 20,
             y: yPosition - 70,
             size: 10,
+            font: page.doc.embedStandardFont(StandardFonts.HelveticaOblique),
         });
     }
 }
