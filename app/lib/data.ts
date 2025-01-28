@@ -329,11 +329,12 @@ export async function fetchFilteredClasses(query: string, currentPage: number) {
                    c.nombre_de_places_disponibles
             FROM classe c
                      JOIN classetype ct ON c.type_id = ct.id
-            WHERE c.nom_de_la_classe ILIKE ${`%${query}%`}
-               OR
-                c.date_et_heure::text ILIKE ${`%${query}%`}
-               OR
-                ct.type_name ILIKE ${`%${query}%`}
+             WHERE c.date_et_heure >= CURRENT_DATE
+               AND (
+                c.nom_de_la_classe ILIKE ${`%${query}%`}
+                OR c.date_et_heure::text ILIKE ${`%${query}%`}
+                OR ct.type_name ILIKE ${`%${query}%`}
+               )
             ORDER BY date_et_heure ASC
                 LIMIT ${ITEMS_PER_PAGE}
             OFFSET ${offset}
