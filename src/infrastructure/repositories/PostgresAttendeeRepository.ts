@@ -60,11 +60,58 @@ export class PostgresAttendeeRepository implements IAttendeeRepository {
     `;
   }
 
-  async delete(id: string): Promise<void> {
-    await sql`
-      DELETE FROM attendees
-      WHERE id = ${id}
-    `;
+  async delete(id: number): Promise<void> {
+    try {
+      // Start a transaction
+      await sql`BEGIN`;
+
+      // First get the attendee details to check the product
+      const attendeeResult = await sql`
+        SELECT a.*, 
+        u.id as user_id,
+        p.id as profile_id
+        FROM attendees a
+        JOIN users u ON a.user_id = u.id
+        JOIN profiles p ON u.id = p.user_id
+        WHERE a.id = ${id}
+      `;
+      console.log(attendeeResult.rows[0]);
+
+      if (attendeeResult.rows[0]?.product === 'carte à 10') {
+        // Get the active carte_a_10 for the user
+        const carteResult = await sql`
+          SELECT id, nombre_credits
+          FROM carte_a_10
+          WHERE profile_id = ${attendeeResult.rows[0].profile_id}
+          AND status = true
+          LIMIT 1
+        `;
+
+        if (carteResult.rows[0]) {
+          // Increment the credits
+          await sql`
+            UPDATE carte_a_10
+            SET nombre_credits = nombre_credits + 1
+            WHERE id = ${carteResult.rows[0].id}
+            AND status = true
+          `;
+        }
+      }
+
+      // Delete the attendee
+      await sql`
+        DELETE FROM attendees
+        WHERE id = ${id}
+      `;
+
+      // Commit the transaction
+      await sql`COMMIT`;
+    } catch (error) {
+      // Rollback in case of error
+      await sql`ROLLBACK`;
+      console.error('Error in delete attendee:', error);
+      throw error;
+    }
   }
 
   async getUserSubscription(profile_id: number): Promise<{

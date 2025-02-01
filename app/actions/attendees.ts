@@ -7,7 +7,7 @@ import { PostgresAttendeeRepository } from '@/src/infrastructure/repositories/Po
 import { PostgresClassRepository } from '@/src/infrastructure/repositories/PostgresClassRepository';
 import { revalidatePath } from 'next/cache';
 
-export async function deleteAttendee(id: string) {
+export async function deleteAttendee(id: number) {
   try {
     // Authenticate user
     const session = await auth();
@@ -40,7 +40,7 @@ export async function deleteAttendee(id: string) {
   }
 }
 
-export async function determineProductType(user_id: string, classe_id: number): Promise<'abonnement' | 'carte a 10'> {
+export async function determineProductType(user_id: string, classe_id: number): Promise<'abonnement' | 'carte à 10'> {
   const attendeeRepository = new PostgresAttendeeRepository();
   const classRepository = new PostgresClassRepository();
   const addPresenceUseCase = new AddPresenceUseCase(attendeeRepository, classRepository);

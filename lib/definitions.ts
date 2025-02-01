@@ -115,7 +115,7 @@ export type ClasseTypeField = {
 };
 
 export type AttendeesTable = {
-  id: string;
+  id: number;
   classe_id: number;
   classe_name: string;
   classe_date: string;

@@ -7,7 +7,7 @@ export class AddPresenceUseCase {
     private classRepository: IClassRepository
   ) {}
 
-  async determineProductType(user_id: string, classe_id: number): Promise<'abonnement' | 'carte a 10'> {
+  async determineProductType(user_id: string, classe_id: number): Promise<'abonnement' | 'carte à 10'> {
     // 1. Get user profile
     const profile = await this.attendeeRepository.getUserProfile(user_id);
     if (!profile) {
@@ -17,7 +17,7 @@ export class AddPresenceUseCase {
     // 2. Check if user has an active subscription using profile_id
     const subscription = await this.attendeeRepository.getUserSubscription(profile.id);
     if (!subscription) {
-      return 'carte a 10';
+      return 'carte à 10';
     }
     console.log("subscription:", subscription);
 
@@ -34,7 +34,7 @@ export class AddPresenceUseCase {
       return 'abonnement';
     }
 
-    return 'carte a 10';
+    return 'carte à 10';
   }
 
   async execute(classe_id: number, user_id: string): Promise<{ message: string }> {

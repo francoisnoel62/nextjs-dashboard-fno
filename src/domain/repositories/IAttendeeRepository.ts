@@ -6,7 +6,7 @@ export interface IAttendeeRepository {
   getUserProfile(user_id: string): Promise<{ id: number } | null>;
   updateUsedCredits(subscription_id: number): Promise<void>;
   updateCarteCredits(carte_id: number): Promise<void>;
-  delete(id: string): Promise<void>;
+  delete(id: number): Promise<void>;
   getUserSubscription(profile_id: number): Promise<{ 
     id: number, 
     default_classe_1_nom_de_la_classe: string, 
