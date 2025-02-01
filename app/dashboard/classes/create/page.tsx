@@ -1,6 +1,6 @@
 import Form from '@/app/ui/classes/create-form';
 import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
-import { fetchClasses, fetchTypes } from '@/app/lib/data';
+import { fetchClasses, fetchTypes } from '@/lib/data';
 
 export default async function Page() {
   const types = await fetchTypes();
