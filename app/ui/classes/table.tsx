@@ -1,7 +1,7 @@
 import { AddPresence } from '@/app/ui/classes/buttons';
-import { formatDateToLocalFrance } from '@/app/lib/utils';
-import { fetchFilteredClasses } from '@/app/lib/data';
-import { getTypeStyles } from '@/app/lib/ui_utils/typeStyles';
+import { formatDateToLocalFrance } from '@/lib/utils';
+import { fetchFilteredClasses } from '@/lib/data';
+import { getTypeStyles } from '@/lib/ui_utils/typeStyles';
 
 export default async function ClassesTable({
   query,

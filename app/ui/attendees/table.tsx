@@ -1,6 +1,6 @@
 import { DeleteAttendee } from '@/app/ui/attendees/buttons';
-import { fetchFilteredAttendees } from '@/app/lib/data';
-import { formatDateToLocalFrance, getWeekGroup, getWeekGroupTitle } from "@/app/lib/utils";
+import { fetchFilteredAttendees } from '@/lib/data';
+import { formatDateToLocalFrance, getWeekGroup, getWeekGroupTitle } from "@/lib/utils";
 
 export default async function AttendeesTable({
   query,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useTransition } from 'react';
-import { generateAttendeesReport } from '@/app/lib/actions';
+import { generateAttendeesReport } from '@/lib/actions';
 import { Button } from '@/app/ui/button';
 import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 

@@ -1,7 +1,7 @@
 import { Card } from '@/app/ui/dashboard/cards';
 import { lusitana } from '@/app/ui/fonts';
-import { fetchCardData } from "@/app/lib/data";
-import { formatDateToLocalFrance } from '@/app/lib/utils';
+import { fetchCardData } from "@/lib/data";
+import { formatDateToLocalFrance } from '@/lib/utils';
 
 export default async function SubscriptionsPage() {
     const {

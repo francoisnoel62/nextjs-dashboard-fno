@@ -3,7 +3,7 @@
 import { PlusIcon, ArrowRightOnRectangleIcon, ArrowLeftOnRectangleIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useState } from 'react';
-import { addPresence } from '../../lib/actions';
+import { addPresence } from '@/lib/actions';
 import { Toast } from '../notifications';
 import { createPortal } from 'react-dom';
 

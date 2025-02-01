@@ -4,7 +4,7 @@ import Table from '@/app/ui/attendees/table';
 import {lusitana} from '@/app/ui/fonts';
 import {AttendeesTableSkeleton} from '@/app/ui/skeletons';
 import {Suspense} from 'react';
-import { fetchAttendeesPages } from '@/app/lib/data';
+import { fetchAttendeesPages } from '@/lib/data';
 import { auth } from '@/auth';
 import PrintAttendees from '@/app/dashboard/attendees/print-attendees';
 

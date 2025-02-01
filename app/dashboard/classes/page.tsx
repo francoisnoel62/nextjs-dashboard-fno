@@ -4,7 +4,7 @@ import Table from '@/app/ui/classes/table';
 import {lusitana} from '@/app/ui/fonts';
 import {ClassesTableSkeleton} from '@/app/ui/skeletons';
 import {Suspense} from 'react';
-import { fetchClassesPages } from '@/app/lib/data';
+import { fetchClassesPages } from '@/lib/data';
 import { CreateClass } from '@/app/ui/classes/buttons';
 import { auth } from '@/auth';
 

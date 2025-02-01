@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { createOrUpdateProfile } from '@/app/lib/actions';
+import { createOrUpdateProfile } from '@/lib/actions';
 
 interface ProfileFormData {
   first_name: string;

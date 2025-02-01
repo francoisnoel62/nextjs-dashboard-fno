@@ -2,7 +2,7 @@
 
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { deleteAttendee } from '@/app/lib/actions';
+import { deleteAttendee } from '@/lib/actions';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';

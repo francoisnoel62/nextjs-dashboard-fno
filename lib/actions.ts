@@ -10,7 +10,7 @@ import bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import { auth } from "@/auth"
 import { PDFDocument, PDFPage, StandardFonts } from 'pdf-lib';
-import { formatDateToLocalFrance } from '@/app/lib/utils';
+import { formatDateToLocalFrance } from '@/lib/utils';
 import { resend } from './resend';
 import NewBooking from '@/emails/NewBooking';
 import { AttendeesTable } from './definitions';

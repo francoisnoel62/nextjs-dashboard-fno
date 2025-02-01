@@ -1,6 +1,6 @@
 import { auth } from '@/auth';
 import ProfileForm from '@/app/ui/profil/profil-form';
-import { fetchProfileByUserId } from '@/app/lib/data';
+import { fetchProfileByUserId } from '@/lib/data';
 import { lusitana } from '@/app/ui/fonts';
 
 export default async function ProfilePage() {

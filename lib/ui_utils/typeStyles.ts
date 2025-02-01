@@ -1,4 +1,4 @@
-import { getClassTypes } from '@/app/lib/data';
+import { getClassTypes } from '@/lib/data';
 
 // Define a set of color combinations we can cycle through
 const COLOR_SCHEMES = [
