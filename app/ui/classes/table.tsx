@@ -1,4 +1,4 @@
-import { AddPresence } from '@/app/ui/classes/buttons';
+import { AddPresenceButton } from '@/src/presentation/components/classes/AddPresenceButton';
 import { formatDateToLocalFrance } from '@/lib/utils';
 import { fetchFilteredClasses } from '@/lib/data';
 import { getTypeStyles } from '@/lib/ui_utils/typeStyles';
@@ -38,7 +38,7 @@ export default async function ClassesTable({
                     </div>
                   </div>
                   <div className="flex justify-end gap-2">
-                    <AddPresence classe_id={classItem.id} containerId='classes-tables' />
+                    <AddPresenceButton classe_id={classItem.id} containerId='classes-tables' />
                   </div>
                 </div>
               </div>
@@ -83,9 +83,9 @@ export default async function ClassesTable({
                   <td className="whitespace-nowrap px-3 py-3 text-gray-500 text-center">
                     {classItem.nombre_de_places_disponibles}
                   </td>
-                  <td className="whitespace-nowrap py-3 pl-6 pr-3">
+                  <td className="py-3 pl-6 pr-3">
                     <div className="flex justify-end gap-3">
-                      <AddPresence classe_id={classItem.id} containerId='classes-tables' />
+                      <AddPresenceButton classe_id={classItem.id} containerId='classes-tables' />
                     </div>
                   </td>
                 </tr>
@@ -97,4 +97,3 @@ export default async function ClassesTable({
     </div>
   );
 }
-

@@ -1,4 +1,4 @@
-import { DeleteAttendee } from '@/app/ui/attendees/buttons';
+import { DeleteAttendee } from '@/src/presentation/components/attendees/DeleteAttendee';
 import { fetchFilteredAttendees } from '@/lib/data';
 import { formatDateToLocalFrance, getWeekGroup, getWeekGroupTitle } from "@/lib/utils";
 

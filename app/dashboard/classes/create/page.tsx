@@ -1,5 +1,4 @@
 import Form from '@/app/ui/classes/create-form';
-import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
 import { fetchClasses, fetchTypes } from '@/lib/data';
 
 export default async function Page() {
@@ -7,7 +6,7 @@ export default async function Page() {
 
   return (
     <main>
-      <Breadcrumbs
+      {/* <Breadcrumbs
         breadcrumbs={[
           { label: 'Classes', href: '/dashboard/classes' },
           {
@@ -16,7 +15,7 @@ export default async function Page() {
             active: true,
           },
         ]}
-      />
+      /> */}
       <Form types={types} />
     </main>
   );

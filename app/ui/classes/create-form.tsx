@@ -1,10 +1,10 @@
-import { ClasseTypeField } from '@/app/lib/definitions';
+import { ClasseTypeField } from '@/lib/definitions';
 import Link from 'next/link';
 import {
   CalendarDateRangeIcon,
 } from '@heroicons/react/24/outline';
 import { Button } from '@/app/ui/button';
-import { createClass } from '@/app/lib/actions';
+import { createClass } from '@/lib/actions';
 
 export default function Form({ types }: { types: ClasseTypeField[] }) {
   return (
