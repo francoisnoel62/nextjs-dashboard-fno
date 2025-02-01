@@ -65,17 +65,17 @@ export class PostgresAttendeeRepository implements IAttendeeRepository {
       // Start a transaction
       await sql`BEGIN`;
 
-      // First get the attendee details to check the product
+      // First get the attendee details to check the product and classe_id
       const attendeeResult = await sql`
         SELECT a.*, 
         u.id as user_id,
-        p.id as profile_id
+        p.id as profile_id,
+        a.classe_id
         FROM attendees a
         JOIN users u ON a.user_id = u.id
         JOIN profiles p ON u.id = p.user_id
         WHERE a.id = ${id}
       `;
-      console.log(attendeeResult.rows[0]);
 
       if (attendeeResult.rows[0]?.product === 'carte à 10') {
         // Get the active carte_a_10 for the user
@@ -103,6 +103,15 @@ export class PostgresAttendeeRepository implements IAttendeeRepository {
         DELETE FROM attendees
         WHERE id = ${id}
       `;
+
+      // Increment the nombre_de_places_disponibles in the classe table
+      if (attendeeResult.rows[0]?.classe_id) {
+        await sql`
+          UPDATE classe
+          SET nombre_de_places_disponibles = nombre_de_places_disponibles + 1
+          WHERE id = ${attendeeResult.rows[0].classe_id}
+        `;
+      }
 
       // Commit the transaction
       await sql`COMMIT`;
