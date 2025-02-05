@@ -1,6 +1,6 @@
-import '@/app/ui/global.css';
-import { inter } from '@/app/ui/fonts';
-import { initializeTypeStyles } from '@/lib/ui_utils/typeStyles';
+import './global.css';
+import { inter } from '@/src/presentation/components/shared/fonts';
+import { initializeTypeStyles } from '@/src/presentation/utils/ui/type-styles.utils';
 
 // Initialize type styles when the app starts
 initializeTypeStyles().catch(console.error);

@@ -1,7 +1,7 @@
-import { Card } from '@/app/ui/dashboard/cards';
-import { lusitana } from '@/app/ui/fonts';
-import { fetchCardData } from "@/lib/data";
-import { formatDateToLocalFrance } from '@/lib/utils';
+import { Card } from '@/src/presentation/components/dashboard/cards';
+import { lusitana } from '@/src/presentation/components/shared/fonts';
+import { formatDateToLocalFrance } from '@/src/presentation/utils/formatting/date.utils';
+import { fetchCardData } from '@/src/domain/useCases/subscriptions/fetch-card-data.use-case';
 
 export default async function SubscriptionsPage() {
     const {
@@ -36,7 +36,7 @@ export default async function SubscriptionsPage() {
                 <Card
                     title="Date échéance abonnement"
                     value={date_echeance_abonnement_value
-                        ? formatDateToLocalFrance(date_echeance_abonnement_value.toISOString())
+                        ? formatDateToLocalFrance(date_echeance_abonnement_value.toString())
                         : 'Pas de date'}
                     type="sub"
                 />

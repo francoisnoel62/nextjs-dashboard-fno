@@ -1,7 +1,7 @@
 import { auth } from '@/auth';
-import ProfileForm from '@/app/ui/profil/profil-form';
-import { fetchProfileByUserId } from '@/lib/data';
-import { lusitana } from '@/app/ui/fonts';
+import { fetchProfileByUserId } from '@/src/applications/actions/profile/fetUserProfile';
+import ProfileForm from '@/src/presentation/components/profil/profil-form';
+import { lusitana } from '@/src/presentation/components/shared/fonts';
 
 export default async function ProfilePage() {
   const session = await auth();
@@ -15,7 +15,7 @@ export default async function ProfilePage() {
         last_name: data.last_name,
         address: data.address,
         telephone: data.telephone,
-        date_of_birth: data.date_of_birth,
+        date_of_birth: data.date_of_birth.toISOString().split('T')[0],
       };
     }
   }

@@ -1,5 +1,5 @@
-import AcmeLogo from '@/app/ui/acme-logo';
-import RegisterForm from '@/app/ui/register-form';
+import AcmeLogo from '@/src/presentation/components/shared/acme-logo';
+import RegisterForm from '@/src/presentation/components/shared/register-form';
 import { Metadata } from 'next';
 import Link from 'next/link';
 

@@ -2,7 +2,7 @@
 
 import { ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 import { usePresence } from '../../hooks/usePresence';
-import { Toast } from '@/app/ui/notifications';
+import { Toast } from '@/src/presentation/components/shared/notifications';
 import { createPortal } from 'react-dom';
 import { useState } from 'react';
 

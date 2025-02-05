@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { addPresence } from '@/app/actions/presence';
+import { addPresence } from '@/src/applications/actions/presences/addPresence';
 
 interface UsePresenceResult {
   loading: boolean;

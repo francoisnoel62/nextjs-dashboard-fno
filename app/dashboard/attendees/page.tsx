@@ -1,12 +1,12 @@
-import Pagination from '@/app/ui/attendees/pagination';
-import Search from '@/app/ui/search';
-import Table from '@/app/ui/attendees/table';
-import {lusitana} from '@/app/ui/fonts';
-import {AttendeesTableSkeleton} from '@/app/ui/skeletons';
+import Pagination from '@/src/presentation/components/attendees/pagination';
+import Search from '@/src/presentation/components/shared/search';
+import Table from '@/src/presentation/components/attendees/table';
+import {lusitana} from '@/src/presentation/components/shared/fonts';
+import {AttendeesTableSkeleton} from '@/src/presentation/components/shared/skeletons';
 import {Suspense} from 'react';
-import { fetchAttendeesPages } from '@/lib/data';
 import { auth } from '@/auth';
-import PrintAttendees from '@/app/dashboard/attendees/print-attendees';
+import PrintAttendees from '@/src/presentation/components/attendees/print-attendees';
+import { fetchAttendeesPages } from '@/src/applications/actions/presences/fetchAttendees';
 
 export default async function Page(
     props: {

@@ -1,12 +1,12 @@
-import Pagination from '@/app/ui/classes/pagination';
-import Search from '@/app/ui/search';
-import Table from '@/app/ui/classes/table';
-import {lusitana} from '@/app/ui/fonts';
-import {ClassesTableSkeleton} from '@/app/ui/skeletons';
+import Pagination from '@/src/presentation/components/classes/pagination';
+import Search from '@/src/presentation/components/shared/search';
+import Table from '@/src/presentation/components/classes/table';
+import {lusitana} from '@/src/presentation/components/shared/fonts';
+import {ClassesTableSkeleton} from '@/src/presentation/components/shared/skeletons';
 import {Suspense} from 'react';
-import { fetchClassesPages } from '@/lib/data';
 import { CreateClass } from '@/src/presentation/components/classes/CreateClass';
 import { auth } from '@/auth';
+import { fetchClassesPages } from '@/src/applications/actions/classes/classes';
 
 export default async function Page(
     props: {

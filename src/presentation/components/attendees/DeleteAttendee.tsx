@@ -1,6 +1,6 @@
 'use client';
 
-import { deleteAttendee } from '../../../../app/actions/attendees';
+import { deleteAttendee } from '../../../applications/actions/presences/deleteAttendee';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
 

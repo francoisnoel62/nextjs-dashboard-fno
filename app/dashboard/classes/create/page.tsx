@@ -1,5 +1,5 @@
-import Form from '@/app/ui/classes/create-form';
-import { fetchClasses, fetchTypes } from '@/lib/data';
+import { fetchTypes } from '@/src/applications/actions/classes/classes';
+import Form from '@/src/presentation/components/classes/create-form';
 
 export default async function Page() {
   const types = await fetchTypes();

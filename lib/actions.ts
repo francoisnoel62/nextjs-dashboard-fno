@@ -10,11 +10,11 @@ import bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import { auth } from "@/auth"
 import { PDFDocument, PDFPage, StandardFonts } from 'pdf-lib';
-import { formatDateToLocalFrance } from '@/lib/utils';
+import { formatDateToLocalFrance } from '@/src/presentation/utils/formatting/date.utils';
 import { resend } from './resend';
 import NewBooking from '@/emails/NewBooking';
-import { AttendeesTable } from './definitions';
 import CancelBookingEmail from '@/emails/CancelBooking';
+import { AttendeesTable } from '@/src/domain/entities/definitions';
 
 
 

@@ -3,11 +3,37 @@ import { IAttendeeRepository } from '../../domain/repositories/IAttendeeReposito
 import { Attendee } from '../../domain/entities/Attendee';
 
 export class PostgresAttendeeRepository implements IAttendeeRepository {
+  async fetchFiltered(query: string, page: number): Promise<Attendee[]> {
+    const offset = (page - 1) * 10;
+    const { rows } = await sql`
+      SELECT *
+      FROM attendees
+      LEFT JOIN classe c ON attendees.classe_id = c.id
+      LEFT JOIN users u ON attendees.user_id = u.id
+      WHERE 
+        c.nom_de_la_classe ILIKE ${`%${query}%`} OR
+        u.name ILIKE ${`%${query}%`}
+      ORDER BY c.date_et_heure DESC
+      LIMIT 10 OFFSET ${offset}
+    `;
+    return rows as Attendee[];
+  }
+
+
   async findByClassAndUser(classe_id: number, user_id: string): Promise<Attendee | null> {
     const result = await sql`
-      SELECT id, classe_id, user_id, product 
-      FROM attendees 
-      WHERE classe_id = ${classe_id} AND user_id = ${user_id}
+      SELECT 
+        a.id, 
+        a.classe_id, 
+        a.user_id, 
+        a.product,
+        c.nom_de_la_classe as classe_name,
+        c.date_et_heure as classe_date,
+        a.created_at as booking_date,
+        c.type_id as classe_type
+      FROM attendees a
+      JOIN classe c ON a.classe_id = c.id
+      WHERE a.classe_id = ${classe_id} AND a.user_id = ${user_id}
     `;
 
     if (!result.rows[0]) return null;
@@ -16,22 +42,24 @@ export class PostgresAttendeeRepository implements IAttendeeRepository {
       id: result.rows[0].id,
       classe_id: result.rows[0].classe_id,
       user_id: result.rows[0].user_id,
-      product: result.rows[0].product
+      product: result.rows[0].product,
     };
   }
 
-  async create(attendee: Attendee): Promise<Attendee> {
+  async create(
+    classe_id: number,
+    user_id: string,
+    product: string
+  ): Promise<void> {
     const result = await sql`
-      INSERT INTO attendees (classe_id, user_id, product)
-      VALUES (${attendee.classe_id}, ${attendee.user_id}, ${attendee.product})
-      RETURNING *
+      INSERT INTO attendees 
+      (classe_id, user_id, product)
+      VALUES (
+        ${classe_id}, 
+        ${user_id}, 
+        ${product}
+      )
     `;
-    return {
-      id: result.rows[0].id,
-      classe_id: result.rows[0].classe_id,
-      user_id: result.rows[0].user_id,
-      product: result.rows[0].product
-    };
   }
 
   async getUserProfile(user_id: string): Promise<{ id: number } | null> {
@@ -182,5 +210,48 @@ export class PostgresAttendeeRepository implements IAttendeeRepository {
     return {
       day_of_week: result.rows[0].day_of_week as string
     };
+  }
+
+  async findById(id: number): Promise<Attendee | null> {
+    const result = await sql`
+      SELECT id, classe_id, user_id, product, classe_name, classe_date, booking_date, classe_type 
+      FROM attendees 
+      WHERE id = ${id}
+    `;
+
+    if (!result.rows[0]) return null;
+
+    return {
+      id: result.rows[0].id,
+      classe_id: result.rows[0].classe_id,
+      user_id: result.rows[0].user_id,
+      product: result.rows[0].product,
+    };
+  }
+
+  async fetchFilteredAttendees(query: string, limit: number, offset: number): Promise<any[]> {
+    const { rows } = await sql`
+      SELECT *
+      FROM attendees
+      WHERE 
+        nom_de_la_classe ILIKE ${`%${query}%`} OR
+        user_name ILIKE ${`%${query}%`}
+      ORDER BY classe_date DESC
+      LIMIT ${limit} OFFSET ${offset}
+    `;
+    return rows;
+  }
+
+  async getFilteredAttendeesCount(query: string): Promise<number> {
+    const { rows } = await sql`
+      SELECT COUNT(*) as count
+      FROM attendees
+      LEFT JOIN classe c ON attendees.classe_id = c.id
+      LEFT JOIN users u ON attendees.user_id = u.id
+      WHERE 
+        c.nom_de_la_classe ILIKE ${`%${query}%`} OR
+        u.name ILIKE ${`%${query}%`}
+    `;
+    return parseInt(rows[0].count);
   }
 }

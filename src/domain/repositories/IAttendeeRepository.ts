@@ -1,8 +1,15 @@
 import { Attendee } from '../entities/Attendee';
 
 export interface IAttendeeRepository {
+  fetchFiltered(query: string, page: number): Promise<Attendee[]>;
+  fetchFilteredAttendees(query: string, limit: number, offset: number): Promise<any[]>;
+  getFilteredAttendeesCount(query: string): Promise<number>;
   findByClassAndUser(classe_id: number, user_id: string): Promise<Attendee | null>;
-  create(attendee: Attendee): Promise<Attendee>;
+  create(
+    classe_id: number,
+    user_id: string,
+    product: string
+  ): Promise<void>;
   getUserProfile(user_id: string): Promise<{ id: number } | null>;
   updateUsedCredits(subscription_id: number): Promise<void>;
   updateCarteCredits(carte_id: number): Promise<void>;
