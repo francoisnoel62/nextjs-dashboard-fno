@@ -2,22 +2,19 @@ export function getWeekGroup(dateStr: string): 'current' | 'next' | 'future' {
     const today = new Date();
     const date = new Date(dateStr);
     
-    // Get the start of the current week (Monday)
-    const currentWeekStart = new Date(today);
-    currentWeekStart.setDate(today.getDate() - today.getDay() + 1);
-    currentWeekStart.setHours(0, 0, 0, 0);
+    // Reset hours to compare dates properly
+    today.setHours(0, 0, 0, 0);
+    date.setHours(0, 0, 0, 0);
     
-    // Get the start of next week
-    const nextWeekStart = new Date(currentWeekStart);
-    nextWeekStart.setDate(currentWeekStart.getDate() + 7);
+    // Calculate days difference
+    const diffTime = date.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
-    // Get the start of the week after next
-    const futureWeekStart = new Date(nextWeekStart);
-    futureWeekStart.setDate(nextWeekStart.getDate() + 7);
-    
-    if (date >= currentWeekStart && date < nextWeekStart) {
+    if (diffDays < 0) {
+        return 'current'; // Past dates are shown in current week
+    } else if (diffDays < 7) {
         return 'current';
-    } else if (date >= nextWeekStart && date < futureWeekStart) {
+    } else if (diffDays < 14) {
         return 'next';
     } else {
         return 'future';

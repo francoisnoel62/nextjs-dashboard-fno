@@ -40,9 +40,9 @@ export default function AttendeesTable({
             >
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="font-semibold">{attendeeItem.classe_id}</p>
+                  <p className="font-semibold">{attendeeItem.nom_de_la_classe}</p>
                   <p className="text-sm text-gray-600">
-                    {formatDateToLocalFrance(attendeeItem.created_at?.toString() ?? '')}
+                    {formatDateToLocalFrance(attendeeItem.date_et_heure?.toString() ?? '')}
                   </p>
                 </div>
                 <DeleteAttendee id={attendeeItem.id} containerId={attendeeItem.classe_id.toString()} />
