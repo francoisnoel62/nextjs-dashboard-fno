@@ -21,5 +21,6 @@ export interface IAttendeeRepository {
   } | null>;
   getClassInfo(classe_id: number): Promise<{ id: number, nom_de_la_classe: string } | null>;
   getUserCarte(profile_id: number): Promise<{ id: number } | null>;
-  getClassDayOfWeek(classe_id: number): Promise<{ day_of_week: string } | null>;
+  getClassDayOfWeek(classe_id: number): Promise<{ nom_de_la_classe: string } | null>;
+  getTotalAttendees(query: string): Promise<number>;
 }

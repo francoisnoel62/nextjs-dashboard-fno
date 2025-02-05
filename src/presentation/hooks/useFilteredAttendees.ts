@@ -2,9 +2,8 @@
 'use client';
 
 import { useState } from 'react';
-import { PostgresAttendeeRepository } from '@/src/infrastructure/repositories/PostgresAttendeeRepository';
-import { FetchFilteredAttendeesUseCase } from '@/src/domain/useCases/presences/FetchFilteredAttendeesUseCase';
 import { Attendee } from '@/src/domain/entities/Attendee';
+import { fetchFilteredAttendees } from '@/src/applications/actions/presences/fetchAttendees';
 
 interface UseFilteredAttendeesResult {
   attendees: Attendee[];
@@ -18,13 +17,11 @@ export function useFilteredAttendees(): UseFilteredAttendeesResult {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchAttendees = async (query: string, page: number) => {
+  const fetchAttendeesData = async (query: string, page: number) => {
     setLoading(true);
     setError(null);
     try {
-      const repository = new PostgresAttendeeRepository();
-      const useCase = new FetchFilteredAttendeesUseCase(repository);
-      const result = await useCase.execute(query, page);
+      const result = await fetchFilteredAttendees(query, page);
       setAttendees(result);
     } catch (err) {
       setError('Failed to fetch attendees');
@@ -38,6 +35,6 @@ export function useFilteredAttendees(): UseFilteredAttendeesResult {
     attendees,
     loading,
     error,
-    fetchAttendees
+    fetchAttendees: fetchAttendeesData
   };
 }

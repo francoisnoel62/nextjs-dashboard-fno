@@ -78,12 +78,12 @@ export default function AttendeesTable({
                 <tr key={attendeeItem.id?.toString() ?? 'temp-' + Math.random()}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
-                      {attendeeItem.classe_id}
+                      {attendeeItem.nom_de_la_classe}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
-                      {formatDateToLocalFrance(attendeeItem.created_at?.toString() ?? '')}
+                      {formatDateToLocalFrance(attendeeItem.date_et_heure?.toString() ?? '')}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

@@ -1,3 +1,4 @@
+import { fetchAttendeesPages } from '@/src/applications/actions/presences/fetchAttendees';
 import Pagination from '@/src/presentation/components/attendees/pagination';
 import Search from '@/src/presentation/components/shared/search';
 import Table from '@/src/presentation/components/attendees/table';
@@ -6,7 +7,6 @@ import {AttendeesTableSkeleton} from '@/src/presentation/components/shared/skele
 import {Suspense} from 'react';
 import { auth } from '@/auth';
 import PrintAttendees from '@/src/presentation/components/attendees/print-attendees';
-import { fetchAttendeesPages } from '@/src/applications/actions/presences/fetchAttendees';
 
 export default async function Page(
     props: {

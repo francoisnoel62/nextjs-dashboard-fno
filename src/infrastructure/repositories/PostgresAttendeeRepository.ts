@@ -3,20 +3,50 @@ import { IAttendeeRepository } from '../../domain/repositories/IAttendeeReposito
 import { Attendee } from '../../domain/entities/Attendee';
 
 export class PostgresAttendeeRepository implements IAttendeeRepository {
+  
   async fetchFiltered(query: string, page: number): Promise<Attendee[]> {
-    const offset = (page - 1) * 10;
-    const { rows } = await sql`
-      SELECT *
-      FROM attendees
-      LEFT JOIN classe c ON attendees.classe_id = c.id
-      LEFT JOIN users u ON attendees.user_id = u.id
-      WHERE 
-        c.nom_de_la_classe ILIKE ${`%${query}%`} OR
-        u.name ILIKE ${`%${query}%`}
-      ORDER BY c.date_et_heure DESC
-      LIMIT 10 OFFSET ${offset}
-    `;
-    return rows as Attendee[];
+    try {
+      const offset = (page - 1) * 10;
+
+      // First, verify the connection and table existence
+      await sql`SELECT 1 FROM attendees LIMIT 1`;
+
+      const result = await sql`
+        SELECT 
+          a.id,
+          a.classe_id,
+          a.user_id,
+          a.product,
+          COALESCE(c.nom_de_la_classe, '') as nom_de_la_classe,
+          COALESCE(c.date_et_heure, CURRENT_TIMESTAMP) as date_et_heure,
+          COALESCE(c.type_id, 0) as classe_type
+        FROM attendees a
+        LEFT JOIN classe c ON a.classe_id = c.id
+        WHERE 
+          COALESCE(c.nom_de_la_classe, '') ILIKE ${`%${query}%`} OR
+          COALESCE(c.date_et_heure::text, '') ILIKE ${`%${query}%`}
+        ORDER BY COALESCE(c.date_et_heure, CURRENT_TIMESTAMP) ASC
+        LIMIT 10 OFFSET ${offset}
+      `;
+      
+      if (!result.rows) {
+        console.error('No rows returned from database');
+        return []; // Return empty array instead of throwing
+      }
+
+      return result.rows.map(row => ({
+        id: row.id,
+        classe_id: row.classe_id,
+        user_id: row.user_id,
+        product: row.product,
+        nom_de_la_classe: row.nom_de_la_classe,
+        date_et_heure: row.date_et_heure,
+        classe_type: row.classe_type
+      }));
+    } catch (error) {
+      console.error('Error in fetchFiltered:', error);
+      throw new Error(`Failed to fetch filtered attendees: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   }
 
 
@@ -62,7 +92,8 @@ export class PostgresAttendeeRepository implements IAttendeeRepository {
     `;
   }
 
-  async getUserProfile(user_id: string): Promise<{ id: number } | null> {
+  async getUserProfile(user_id: string | ''): Promise<{ id: number } | null> {
+    if (!user_id) return null;
     const result = await sql`
       SELECT id FROM profiles
       WHERE user_id = ${user_id}
@@ -202,21 +233,21 @@ export class PostgresAttendeeRepository implements IAttendeeRepository {
     };
   }
 
-  async getClassDayOfWeek(classe_id: number): Promise<{ day_of_week: string } | null> {
+  async getClassDayOfWeek(classe_id: number): Promise<{ nom_de_la_classe: string } | null> {
     const result = await sql`
-      SELECT day_of_week FROM classe WHERE id = ${classe_id}  
+      SELECT nom_de_la_classe FROM classe WHERE id = ${classe_id}  
     `;
     if (!result.rows[0]) return null;
     return {
-      day_of_week: result.rows[0].day_of_week as string
+      nom_de_la_classe: result.rows[0].nom_de_la_classe as string
     };
   }
 
   async findById(id: number): Promise<Attendee | null> {
     const result = await sql`
-      SELECT id, classe_id, user_id, product, classe_name, classe_date, booking_date, classe_type 
-      FROM attendees 
-      WHERE id = ${id}
+      SELECT a.*
+      FROM attendees a
+      WHERE a.id = ${id}
     `;
 
     if (!result.rows[0]) return null;
@@ -253,5 +284,23 @@ export class PostgresAttendeeRepository implements IAttendeeRepository {
         u.name ILIKE ${`%${query}%`}
     `;
     return parseInt(rows[0].count);
+  }
+
+  async getTotalAttendees(query: string): Promise<number> {
+    try {
+      const result = await sql`
+        SELECT COUNT(*) as count
+        FROM attendees a
+        LEFT JOIN classe c ON a.classe_id = c.id
+        WHERE 
+          COALESCE(c.nom_de_la_classe, '') ILIKE ${`%${query}%`} OR
+          COALESCE(c.date_et_heure::text, '') ILIKE ${`%${query}%`}
+      `;
+      
+      return Number(result.rows[0].count);
+    } catch (error) {
+      console.error('Database error:', error);
+      throw new Error('Failed to get total attendees count');
+    }
   }
 }

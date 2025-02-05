@@ -12,7 +12,7 @@ export class FetchCardDataUseCase {
         }
 
         // Get user profile
-        const userProfile = await this.attendeeRepository.getUserProfile(session.user.email);
+        const userProfile = await this.attendeeRepository.getUserProfile(session.user.id ?? '');
         if (!userProfile) {
             return {
                 nombre_classes_par_semaine_value: '',
@@ -35,7 +35,7 @@ export class FetchCardDataUseCase {
         let dayOfWeek = '';
         if (subscription?.default_classe_1_nom_de_la_classe) {
             const classInfo = await this.attendeeRepository.getClassDayOfWeek(subscription.id);
-            dayOfWeek = classInfo?.day_of_week || '';
+            dayOfWeek = classInfo?.nom_de_la_classe || '';
         }
 
         // Get user carte (for credits)
