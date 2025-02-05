@@ -26,7 +26,7 @@ export function AddPresenceButton({ classe_id, containerId = '' }: AddPresenceBu
         <span className="hidden md:block">
           {loading ? 'Adding...' : ''}
         </span>
-        <ArrowRightOnRectangleIcon className="h-5 md:ml-4" />
+        <ArrowRightOnRectangleIcon className="h-6 w-6 md:h-5 md:w-5" />
       </button>
 
       {showToast &&
