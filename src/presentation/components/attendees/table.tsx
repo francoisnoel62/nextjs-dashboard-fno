@@ -4,7 +4,7 @@ import { DeleteAttendee } from '@/src/presentation/components/attendees/DeleteAt
 import { formatDateToLocalFrance } from '@/src/presentation/utils/formating/date.utils';
 import { getWeekGroupTitle } from '@/src/presentation/utils/week-grouping.utils';
 import { Attendee } from '@/src/domain/entities/Attendee';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useFilteredAttendees } from '../../hooks/useFilteredAttendees';
 import { useGroupedAttendees } from '../../hooks/useGroupedAttendees';
 
@@ -17,10 +17,15 @@ export default function AttendeesTable({
 }) {
   const { attendees, loading, error, fetchAttendees } = useFilteredAttendees();
   const groupedAttendees = useGroupedAttendees(attendees);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     fetchAttendees(query, currentPage);
-  }, [query, currentPage]);
+  }, [query, currentPage, refreshKey]);
+
+  const handleAttendeeDeleted = () => {
+    setRefreshKey(prev => prev + 1);
+  };
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
@@ -45,7 +50,11 @@ export default function AttendeesTable({
                     {formatDateToLocalFrance(attendeeItem.date_et_heure?.toString() ?? '')}
                   </p>
                 </div>
-                <DeleteAttendee id={attendeeItem.id} containerId={attendeeItem.classe_id.toString()} />
+                <DeleteAttendee 
+                  id={attendeeItem.id} 
+                  containerId={attendeeItem.classe_id.toString()} 
+                  onDeleted={handleAttendeeDeleted}
+                />
               </div>
             </div>
           ))}
@@ -87,7 +96,11 @@ export default function AttendeesTable({
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <DeleteAttendee id={attendeeItem.id} containerId={attendeeItem.classe_id.toString()} />
+                    <DeleteAttendee 
+                      id={attendeeItem.id} 
+                      containerId={attendeeItem.classe_id.toString()} 
+                      onDeleted={handleAttendeeDeleted}
+                    />
                   </td>
                 </tr>
               ))}
@@ -99,7 +112,7 @@ export default function AttendeesTable({
   };
 
   return (
-    <div>
+    <div key={refreshKey}>
       {Object.entries(groupedAttendees).map(([group, attendees]) =>
         renderGroup(attendees, group as 'current' | 'next' | 'future')
       )}

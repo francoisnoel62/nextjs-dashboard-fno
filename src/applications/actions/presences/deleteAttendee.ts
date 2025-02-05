@@ -10,53 +10,38 @@ import { CancelBookingEmail } from '@/emails/CancelBooking';
 
 export async function deleteAttendee(id: number) {
   try {
-    // Authenticate user
     const session = await auth();
     if (!session?.user?.id) {
-      return { message: 'User not authenticated or invalid user ID' };
+      return { success: false, message: 'User not authenticated or invalid user ID' };
     }
 
-    const user_id = session.user.id;
-
-    // Initialize repository
     const attendeeRepository = new PostgresAttendeeRepository();
-
-    // Get attendee details before deletion for email
     const attendee = await attendeeRepository.findById(id);
+    
     if (!attendee) {
-      return { message: 'Attendee not found' };
+      return { success: false, message: 'Attendee not found' };
     }
 
-    // Initialize use case
     const deleteAttendeeUseCase = new DeleteAttendeeUseCase(attendeeRepository);
-    // const getFormattedAttendeeClasseDateUseCase = new GetFormattedAttendeeClasseDateUseCase(attendeeRepository);
-
-    // Execute use case
     const result = await deleteAttendeeUseCase.execute(id);
 
-    // const atendee_classe_date = await getFormattedAttendeeClasseDateUseCase.execute(attendee.id);
+    // Envoyer l'email de manière asynchrone sans attendre sa complétion
+    resend.emails.send({
+      from: "do-not-answer@mydenzali.fr",
+      to: 'info@denzali.ch',
+      subject: 'Annulation de réservation',
+      react: CancelBookingEmail({
+        ...attendee,
+      })
+    }).catch(error => {
+      console.error('Error sending cancellation email:', error);
+      // Ne pas bloquer le processus en cas d'erreur d'envoi d'email
+    });
 
-    // Send cancellation email
-    try {
-      await resend.emails.send({
-        from: "do-not-answer@mydenzali.fr",
-        to: 'info@denzali.ch',
-        subject: 'Annulation de réservation',
-        react: CancelBookingEmail({
-          ...attendee,
-          // formattedDate: atendee_classe_date
-        })
-      });
-    } catch (emailError) {
-      console.error('Error sending cancellation email:', emailError);
-      // Continue execution even if email fails
-    }
-
-    // Revalidate the pages that might show attendee data
-    revalidatePath('/dashboard/classes');
+    // Revalidate immediately after successful deletion
     revalidatePath('/dashboard/attendees');
-
-    return { success: true };
+    
+    return { success: true, attendee };
   } catch (error) {
     console.error('Error in deleteAttendee:', error);
     return {
@@ -65,5 +50,3 @@ export async function deleteAttendee(id: number) {
     };
   }
 }
-
-
