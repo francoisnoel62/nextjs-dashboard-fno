@@ -5,7 +5,6 @@ import { DeleteAttendeeUseCase } from '@/src/domain/useCases/presences/DeleteAtt
 import { PostgresAttendeeRepository } from '@/src/infrastructure/repositories/PostgresAttendeeRepository';
 import { revalidatePath } from 'next/cache';
 import { resend } from '@/lib/resend';
-import { KoalaWelcomeEmail } from '@/emails/NewBooking';
 import { CancelBookingEmail } from '@/emails/CancelBooking';
 
 export async function deleteAttendee(id: number) {
@@ -16,14 +15,11 @@ export async function deleteAttendee(id: number) {
     }
 
     const attendeeRepository = new PostgresAttendeeRepository();
-    const attendee = await attendeeRepository.findById(id);
+    const attendee = await attendeeRepository.findAndDelete(id);
     
     if (!attendee) {
       return { success: false, message: 'Attendee not found' };
     }
-
-    const deleteAttendeeUseCase = new DeleteAttendeeUseCase(attendeeRepository);
-    const result = await deleteAttendeeUseCase.execute(id);
 
     // Envoyer l'email de manière asynchrone sans attendre sa complétion
     resend.emails.send({

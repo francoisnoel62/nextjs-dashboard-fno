@@ -303,4 +303,65 @@ export class PostgresAttendeeRepository implements IAttendeeRepository {
       throw new Error('Failed to get total attendees count');
     }
   }
+
+  async findAndDelete(id: number): Promise<Attendee | null> {
+    try {
+      // Start a transaction
+      await sql`BEGIN`;
+
+      // Get attendee details and delete in one transaction
+      const result = await sql`
+        WITH deleted_attendee AS (
+          DELETE FROM attendees a
+          WHERE a.id = ${id}
+          RETURNING a.*, 
+            (SELECT p.id FROM users u 
+             JOIN profiles p ON u.id = p.user_id 
+             WHERE u.id = a.user_id) as profile_id
+        )
+        SELECT * FROM deleted_attendee
+      `;
+
+      if (!result.rows[0]) {
+        await sql`ROLLBACK`;
+        return null;
+      }
+
+      const attendee = result.rows[0];
+
+      // Handle carte à 10 credit return
+      if (attendee.product === 'carte à 10') {
+        const carteResult = await sql`
+          UPDATE carte_a_10
+          SET nombre_credits = nombre_credits + 1
+          WHERE profile_id = ${attendee.profile_id}
+          AND status = true
+          RETURNING id
+        `;
+      }
+
+      // Update classe disponibility
+      if (attendee.classe_id) {
+        await sql`
+          UPDATE classe
+          SET nombre_de_places_disponibles = nombre_de_places_disponibles + 1
+          WHERE id = ${attendee.classe_id}
+        `;
+      }
+
+      // Commit the transaction
+      await sql`COMMIT`;
+
+      return {
+        id: attendee.id,
+        classe_id: attendee.classe_id,
+        user_id: attendee.user_id,
+        product: attendee.product,
+      };
+    } catch (error) {
+      await sql`ROLLBACK`;
+      console.error('Error in findAndDelete:', error);
+      throw error;
+    }
+  }
 }

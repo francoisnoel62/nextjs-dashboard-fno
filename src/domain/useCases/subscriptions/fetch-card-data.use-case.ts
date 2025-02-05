@@ -1,5 +1,6 @@
 import { IAttendeeRepository } from '@/src/domain/repositories/IAttendeeRepository';
 import { auth } from '@/auth';
+import { PostgresAttendeeRepository } from '@/src/infrastructure/repositories/PostgresAttendeeRepository';
 
 export class FetchCardDataUseCase {
     constructor(private attendeeRepository: IAttendeeRepository) {}
@@ -53,8 +54,6 @@ export class FetchCardDataUseCase {
 
 // Export a singleton instance of the use case
 export async function fetchCardData() {
-    const { sql } = await import('@vercel/postgres');
-    const { PostgresAttendeeRepository } = await import('@/src/infrastructure/repositories/PostgresAttendeeRepository');
     
     const attendeeRepository = new PostgresAttendeeRepository();
     const useCase = new FetchCardDataUseCase(attendeeRepository);
