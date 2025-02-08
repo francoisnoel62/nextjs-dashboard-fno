@@ -1,44 +1,32 @@
-import Pagination from '@/src/presentation/components/classes/pagination';
-import Search from '@/src/presentation/components/shared/search';
-import Table from '@/src/presentation/components/classes/table';
-import {lusitana} from '@/src/presentation/components/shared/fonts';
-import {ClassesTableSkeleton} from '@/src/presentation/components/shared/skeletons';
-import {Suspense} from 'react';
-import { CreateClass } from '@/src/presentation/components/classes/CreateClass';
+// app/dashboard/page.tsx (Server Component)
+import ClassesPage from '@/src/presentation/components/classes/ClassesPage';
 import { auth } from '@/auth';
-import { fetchClassesPages } from '@/src/applications/actions/classes/classes';
+import { fetchClassesPages, fetchFilteredClasses } from '@/src/applications/actions/classes/classes';
 
-export default async function Page(
-    props: {
-        searchParams?: Promise<{
-            query?: string;
-            page?: string;
-        }>;
-    }
-) {
-    const searchParams = await props.searchParams;
-    const query = searchParams?.query || '';
-    const currentPage = Number(searchParams?.page) || 1;
+export default async function Page({
+  searchParams,
+}: {
+  searchParams?: { query?: string; page?: string };
+}) {
+  const query = searchParams?.query || '';
+  const currentPage = Number(searchParams?.page) || 1;
 
-    const totalPages = await fetchClassesPages(query);
-    const session = await auth();
-    const user = session?.user;
+  // Fetch the data required for the UI
+  const totalPages = await fetchClassesPages(query);
+  const classes = await fetchFilteredClasses(query, currentPage);
+  const session = await auth();
+  
+  // Ensure we only pass a user object with a valid email
+  const user = session?.user?.email ? { email: session.user.email } : null;
 
-    return (
-        <div className="w-full">
-            <div className="flex w-full items-center justify-between">
-                <h1 className={`${lusitana.className} text-2xl`}>Classes</h1>
-            </div>
-            <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
-                <Search placeholder="Search classes..."/>
-                {user && user.email === process.env.DZ_EMAIL && <CreateClass />}
-            </div>
-            <Suspense key={query + currentPage} fallback={<ClassesTableSkeleton/>}>
-                <Table query={query} currentPage={currentPage}/>
-            </Suspense>
-            <div className="mt-5 flex w-full justify-center">
-                <Pagination totalPages={totalPages} />
-            </div>
-        </div>
-    );
+  // Pass the data as props to the pure UI component
+  return (
+    <ClassesPage
+      totalPages={totalPages}
+      user={user}
+      query={query}
+      currentPage={currentPage}
+      classes={classes}
+    />
+  );
 }

@@ -1,16 +1,13 @@
-import { fetchFilteredClasses } from '@/src/applications/actions/classes/classes';
+import { Class } from '@/src/domain/entities/Class';
 import { AddPresenceButton } from '@/src/presentation/components/classes/AddPresenceButton';
 import { formatDateToLocalFrance } from '@/src/presentation/utils/formatting/date.utils';
 import { getTypeStyles } from '@/src/presentation/utils/ui/type-styles.utils';
 
 export default async function ClassesTable({
-  query,
-  currentPage,
+  classes,
 }: {
-  query: string;
-  currentPage: number;
+  classes: Class[];
 }) {
-  const classes = await fetchFilteredClasses(query, currentPage);
 
   return (
     <div id="classes-tables" className="relative mt-6 flow-root">
