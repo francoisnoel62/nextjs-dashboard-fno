@@ -3,11 +3,12 @@ import ClassesPage from '@/src/presentation/components/classes/ClassesPage';
 import { auth } from '@/auth';
 import { fetchClassesPages, fetchFilteredClasses } from '@/src/applications/actions/classes/classes';
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams?: { query?: string; page?: string };
-}) {
+export default async function Page(
+  props: {
+    searchParams?: Promise<{ query?: string; page?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const query = searchParams?.query || '';
   const currentPage = Number(searchParams?.page) || 1;
 
@@ -15,7 +16,7 @@ export default async function Page({
   const totalPages = await fetchClassesPages(query);
   const classes = await fetchFilteredClasses(query, currentPage);
   const session = await auth();
-  
+
   // Ensure we only pass a user object with a valid email
   const user = session?.user?.email ? { email: session.user.email } : null;
 
