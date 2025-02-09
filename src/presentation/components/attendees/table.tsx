@@ -11,12 +11,14 @@ export default function AttendeesTable({
   groupedAttendees,
   loading,
   error,
-  onAttendeeDeleted
+  onAttendeeDeleted,
+  onOptimisticDelete
 }: {
   groupedAttendees: GroupedAttendees;
   loading: boolean;
   error: string | null;
   onAttendeeDeleted: () => Promise<void>;
+  onOptimisticDelete: (id: number) => void;
 }) {
   const uniqueIdPrefix = useId();
 
@@ -47,6 +49,7 @@ export default function AttendeesTable({
                   id={attendeeItem.id} 
                   containerId={attendeeItem.classe_id.toString()}
                   onDeleted={onAttendeeDeleted}
+                  onOptimisticDelete={onOptimisticDelete}
                 />
               </div>
             </div>
@@ -87,6 +90,7 @@ export default function AttendeesTable({
                       id={attendeeItem.id} 
                       containerId={attendeeItem.classe_id.toString()}
                       onDeleted={onAttendeeDeleted}
+                      onOptimisticDelete={onOptimisticDelete}
                     />
                   </td>
                 </tr>

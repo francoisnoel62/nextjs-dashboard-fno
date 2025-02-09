@@ -7,11 +7,13 @@ import { useState } from 'react';
 export function DeleteAttendee({ 
   id, 
   containerId,
-  onDeleted
+  onDeleted,
+  onOptimisticDelete
 }: { 
   id: number; 
   containerId: string;
   onDeleted: () => Promise<void>;
+  onOptimisticDelete: (id: number) => void;
 }) {
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -23,19 +25,23 @@ export function DeleteAttendee({
     setIsDeleting(true);
     
     try {
+      // Trigger optimistic update immediately
+      onOptimisticDelete(id);
+      
       const result = await deleteAttendee(id);
       
       if (!result.success) {
         alert(result.message || 'Failed to delete attendee');
+        // If delete failed, refresh to get the correct state
+        await onDeleted();
         return;
       }
-
-      // Call the callback to refresh the data
-      await onDeleted();
       
     } catch (error) {
       console.error('Error:', error);
       alert('An error occurred while deleting');
+      // If delete failed, refresh to get the correct state
+      await onDeleted();
     } finally {
       setIsDeleting(false);
     }

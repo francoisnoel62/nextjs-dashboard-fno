@@ -30,6 +30,11 @@ export default function AttendeesPage({
   const { attendees, loading, error, fetchAttendees } = useFilteredAttendees(localAttendees);
   const groupedAttendees = useGroupedAttendees(attendees);
 
+  const handleOptimisticDelete = useCallback((deletedId: number) => {
+    // Update local state immediately
+    setLocalAttendees(current => current.filter(attendee => attendee.id !== deletedId));
+  }, []);
+
   const handleAttendeeDeleted = useCallback(async () => {
     const query = new URLSearchParams(window.location.search).get('query') || '';
     const page = Number(new URLSearchParams(window.location.search).get('page')) || 1;
@@ -51,6 +56,7 @@ export default function AttendeesPage({
           loading={loading} 
           error={error} 
           onAttendeeDeleted={handleAttendeeDeleted}
+          onOptimisticDelete={handleOptimisticDelete}
         />
       </Suspense>
       <div className="mt-5 flex w-full justify-center">

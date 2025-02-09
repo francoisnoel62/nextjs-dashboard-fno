@@ -20,11 +20,10 @@ export function useFilteredAttendees(initialAttendees: Attendee[] = []): UseFilt
   const searchParams = useSearchParams();
 
   const fetchAttendeesData = async (query: string, page: number) => {
-    setLoading(true);
-    setError(null);
     try {
       const result = await fetchFilteredAttendees(query, page);
       setAttendees(result);
+      setError(null);
     } catch (err) {
       setError('Failed to fetch attendees');
       console.error(err);
@@ -37,6 +36,7 @@ export function useFilteredAttendees(initialAttendees: Attendee[] = []): UseFilt
   useEffect(() => {
     const query = searchParams?.get('query') || '';
     const page = Number(searchParams?.get('page')) || 1;
+    setLoading(true);
     fetchAttendeesData(query, page);
   }, [searchParams]);
 
