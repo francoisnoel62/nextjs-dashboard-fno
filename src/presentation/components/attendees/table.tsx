@@ -9,20 +9,17 @@ import { useId } from 'react';
 
 export default function AttendeesTable({
   groupedAttendees,
-  loading,
   error,
   onAttendeeDeleted,
-  onOptimisticDelete
+  onOptimisticDelete,
 }: {
   groupedAttendees: GroupedAttendees;
-  loading: boolean;
   error: string | null;
   onAttendeeDeleted: () => Promise<void>;
   onOptimisticDelete: (id: number) => void;
 }) {
   const uniqueIdPrefix = useId();
 
-  if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
 
   const renderGroup = (attendees: Attendee[], group: 'current' | 'next' | 'future') => {

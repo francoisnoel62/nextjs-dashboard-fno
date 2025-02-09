@@ -1,7 +1,6 @@
 "use client";
 
 import { lusitana } from '@/src/presentation/components/shared/fonts';
-import { AttendeesTableSkeleton } from '@/src/presentation/components/shared/skeletons';
 import Pagination from './pagination';
 import Search from '../shared/search';
 import Table from './table';
@@ -11,6 +10,7 @@ import { Attendee } from '@/src/domain/entities/Attendee';
 import { useFilteredAttendees } from '../../hooks/useFilteredAttendees';
 import { useGroupedAttendees } from '../../hooks/useGroupedAttendees';
 import { useSearchParams } from 'next/navigation';
+import AttendeesTableSkeleton from '../skeletons/AttendeeTableSkeleton';
 
 interface AttendeesPageProps {
   totalPages: number;
@@ -58,7 +58,6 @@ export default function AttendeesPage({
       <Suspense key={query + currentPage} fallback={<AttendeesTableSkeleton />}>
         <Table 
           groupedAttendees={groupedAttendees} 
-          loading={loading} 
           error={error} 
           onAttendeeDeleted={handleAttendeeDeleted}
           onOptimisticDelete={handleOptimisticDelete}

@@ -36,6 +36,7 @@ export async function deleteAttendee(id: number) {
 
     // Revalidate immediately after successful deletion
     revalidatePath('/dashboard/attendees');
+    revalidatePath('/dashboard'); // Also revalidate the dashboard in case it shows attendee counts
     
     return { success: true, attendee };
   } catch (error) {

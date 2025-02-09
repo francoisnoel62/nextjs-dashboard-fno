@@ -32,18 +32,18 @@ export function DeleteAttendee({
       
       if (!result.success) {
         alert(result.message || 'Failed to delete attendee');
-        // If delete failed, refresh to get the correct state
+        // Revert optimistic update on failure
         await onDeleted();
         return;
       }
       
-      // Call onDeleted after successful deletion to refresh the data
+      // Call onDeleted to ensure UI is in sync with server state
       await onDeleted();
       
     } catch (error) {
       console.error('Error:', error);
       alert('An error occurred while deleting');
-      // If delete failed, refresh to get the correct state
+      // Revert optimistic update on error
       await onDeleted();
     } finally {
       setIsDeleting(false);
@@ -52,12 +52,14 @@ export function DeleteAttendee({
 
   return (
     <button
+      className={`rounded-md ${isDeleting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-50'} p-2 transition-colors`}
       onClick={handleDelete}
       disabled={isDeleting}
-      className="text-red-600 hover:text-red-900 disabled:opacity-50"
       aria-label="Delete attendee"
     >
-      <TrashIcon className="h-5 w-5" />
+      <TrashIcon 
+        className={`h-5 w-5 ${isDeleting ? 'animate-pulse text-red-300' : 'text-red-500'}`} 
+      />
     </button>
   );
 }
