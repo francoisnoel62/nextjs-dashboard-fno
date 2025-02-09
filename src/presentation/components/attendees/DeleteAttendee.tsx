@@ -25,24 +25,18 @@ export function DeleteAttendee({
     setIsDeleting(true);
     
     try {
-      // Appeler onDeleted immédiatement pour une UX optimiste
-      onDeleted?.();
-      
       const result = await deleteAttendee(id);
       
       if (!result.success) {
-        // En cas d'échec, annuler l'optimisation
-        router.refresh();
         alert(result.message || 'Failed to delete attendee');
         return;
       }
 
-      // Pas besoin de rafraîchir car l'action serveur appelle déjà revalidatePath
-      console.log('Attendee successfully deleted');
+      // Call onDeleted callback if provided
+      onDeleted?.();
+      
     } catch (error) {
       console.error('Error:', error);
-      // En cas d'erreur, annuler l'optimisation
-      router.refresh();
       alert('An error occurred while deleting');
     } finally {
       setIsDeleting(false);

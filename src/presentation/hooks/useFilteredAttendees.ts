@@ -12,8 +12,8 @@ interface UseFilteredAttendeesResult {
   fetchAttendees: (query: string, page: number) => Promise<void>;
 }
 
-export function useFilteredAttendees(): UseFilteredAttendeesResult {
-  const [attendees, setAttendees] = useState<Attendee[]>([]);
+export function useFilteredAttendees(initialAttendees: Attendee[] = []): UseFilteredAttendeesResult {
+  const [attendees, setAttendees] = useState<Attendee[]>(initialAttendees);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

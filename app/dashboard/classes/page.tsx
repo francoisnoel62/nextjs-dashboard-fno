@@ -1,4 +1,3 @@
-// app/dashboard/page.tsx (Server Component)
 import ClassesPage from '@/src/presentation/components/classes/ClassesPage';
 import { auth } from '@/auth';
 import { fetchClassesPages, fetchFilteredClasses } from '@/src/applications/actions/classes/classes';
