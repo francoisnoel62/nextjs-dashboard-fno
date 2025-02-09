@@ -6,7 +6,7 @@ import Pagination from './pagination';
 import Search from '../shared/search';
 import Table from './table';
 import PrintAttendees from './print-attendees';
-import { Suspense } from 'react';
+import { Suspense, useCallback, useState } from 'react';
 import { Attendee } from '@/src/domain/entities/Attendee';
 import { useFilteredAttendees } from '../../hooks/useFilteredAttendees';
 import { useGroupedAttendees } from '../../hooks/useGroupedAttendees';
@@ -26,8 +26,15 @@ export default function AttendeesPage({
   user,
   initialAttendees,
 }: AttendeesPageProps) {
-  const { attendees, loading, error } = useFilteredAttendees(initialAttendees);
+  const [localAttendees, setLocalAttendees] = useState(initialAttendees);
+  const { attendees, loading, error, fetchAttendees } = useFilteredAttendees(localAttendees);
   const groupedAttendees = useGroupedAttendees(attendees);
+
+  const handleAttendeeDeleted = useCallback(async () => {
+    const query = new URLSearchParams(window.location.search).get('query') || '';
+    const page = Number(new URLSearchParams(window.location.search).get('page')) || 1;
+    await fetchAttendees(query, page);
+  }, [fetchAttendees]);
 
   return (
     <div className="w-full">
@@ -39,7 +46,12 @@ export default function AttendeesPage({
         {user?.email === process.env.DZ_EMAIL && <PrintAttendees />}
       </div>
       <Suspense key={query + currentPage} fallback={<AttendeesTableSkeleton />}>
-        <Table groupedAttendees={groupedAttendees} loading={loading} error={error} />
+        <Table 
+          groupedAttendees={groupedAttendees} 
+          loading={loading} 
+          error={error} 
+          onAttendeeDeleted={handleAttendeeDeleted}
+        />
       </Suspense>
       <div className="mt-5 flex w-full justify-center">
         <Pagination totalPages={totalPages} />

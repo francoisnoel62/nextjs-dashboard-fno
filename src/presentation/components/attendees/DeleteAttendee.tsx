@@ -2,7 +2,6 @@
 
 import { deleteAttendee } from '../../../applications/actions/presences/deleteAttendee';
 import { TrashIcon } from '@heroicons/react/24/outline';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 export function DeleteAttendee({ 
@@ -12,9 +11,8 @@ export function DeleteAttendee({
 }: { 
   id: number; 
   containerId: string;
-  onDeleted?: () => void;
+  onDeleted: () => Promise<void>;
 }) {
-  const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
@@ -32,8 +30,8 @@ export function DeleteAttendee({
         return;
       }
 
-      // Call onDeleted callback if provided
-      onDeleted?.();
+      // Call the callback to refresh the data
+      await onDeleted();
       
     } catch (error) {
       console.error('Error:', error);
@@ -46,14 +44,11 @@ export function DeleteAttendee({
   return (
     <button
       onClick={handleDelete}
-      className="rounded-md border p-2 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
       disabled={isDeleting}
+      className="text-red-600 hover:text-red-900 disabled:opacity-50"
+      aria-label="Delete attendee"
     >
-      {isDeleting ? (
-        <div className="w-5 h-5 border-t-2 border-b-2 border-gray-500 rounded-full animate-spin" />
-      ) : (
-        <TrashIcon className="w-5" />
-      )}
+      <TrashIcon className="h-5 w-5" />
     </button>
   );
 }

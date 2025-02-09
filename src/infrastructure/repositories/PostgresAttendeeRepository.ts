@@ -306,62 +306,60 @@ export class PostgresAttendeeRepository implements IAttendeeRepository {
 
   async findAndDelete(id: number): Promise<Attendee | null> {
     try {
-      // Start a transaction
-      await sql`BEGIN`;
-
-      // Get attendee details and delete in one transaction
+      // Use a CTE to get all necessary data in a single query
       const result = await sql`
-        WITH deleted_attendee AS (
-          DELETE FROM attendees a
+        WITH attendee_data AS (
+          SELECT 
+            a.*,
+            c.nombre_de_places_disponibles,
+            p.id as profile_id
+          FROM attendees a
+          JOIN classe c ON a.classe_id = c.id
+          JOIN profiles p ON a.user_id = p.user_id
           WHERE a.id = ${id}
-          RETURNING a.*, 
-            (SELECT p.id FROM users u 
-             JOIN profiles p ON u.id = p.user_id 
-             WHERE u.id = a.user_id) as profile_id
+        ),
+        deleted_attendee AS (
+          DELETE FROM attendees
+          WHERE id = ${id}
+          RETURNING *
+        ),
+        update_classe AS (
+          UPDATE classe c
+          SET nombre_de_places_disponibles = c.nombre_de_places_disponibles + 1
+          FROM attendee_data ad
+          WHERE c.id = ad.classe_id
+        ),
+        update_carte AS (
+          UPDATE carte_a_10 ca
+          SET nombre_credits = ca.nombre_credits + 1
+          FROM attendee_data ad
+          WHERE ca.profile_id = ad.profile_id
+          AND ca.status = true
+          AND EXISTS (
+            SELECT 1 FROM deleted_attendee 
+            WHERE product = 'carte à 10'
+          )
         )
-        SELECT * FROM deleted_attendee
+        SELECT d.*, ad.profile_id
+        FROM deleted_attendee d
+        JOIN attendee_data ad ON true
       `;
 
       if (!result.rows[0]) {
-        await sql`ROLLBACK`;
         return null;
       }
 
-      const attendee = result.rows[0];
-
-      // Handle carte à 10 credit return
-      if (attendee.product === 'carte à 10') {
-        const carteResult = await sql`
-          UPDATE carte_a_10
-          SET nombre_credits = nombre_credits + 1
-          WHERE profile_id = ${attendee.profile_id}
-          AND status = true
-          RETURNING id
-        `;
-      }
-
-      // Update classe disponibility
-      if (attendee.classe_id) {
-        await sql`
-          UPDATE classe
-          SET nombre_de_places_disponibles = nombre_de_places_disponibles + 1
-          WHERE id = ${attendee.classe_id}
-        `;
-      }
-
-      // Commit the transaction
-      await sql`COMMIT`;
-
       return {
-        id: attendee.id,
-        classe_id: attendee.classe_id,
-        user_id: attendee.user_id,
-        product: attendee.product,
+        id: result.rows[0].id,
+        classe_id: result.rows[0].classe_id,
+        user_id: result.rows[0].user_id,
+        product: result.rows[0].product,
       };
     } catch (error) {
-      await sql`ROLLBACK`;
       console.error('Error in findAndDelete:', error);
-      throw error;
+      throw new Error(
+        `Failed to delete attendee: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 }

@@ -1,22 +1,23 @@
 "use client";
 
-import { useId } from 'react';
 import { DeleteAttendee } from '@/src/presentation/components/attendees/DeleteAttendee';
 import { formatDateToLocalFrance } from '@/src/presentation/utils/formating/date.utils';
 import { getWeekGroupTitle } from '@/src/presentation/utils/week-grouping.utils';
 import { Attendee } from '@/src/domain/entities/Attendee';
 import { GroupedAttendees } from '@/src/domain/services/attendeeGroupingService';
+import { useId } from 'react';
 
 export default function AttendeesTable({
   groupedAttendees,
   loading,
-  error
+  error,
+  onAttendeeDeleted
 }: {
   groupedAttendees: GroupedAttendees;
   loading: boolean;
   error: string | null;
+  onAttendeeDeleted: () => Promise<void>;
 }) {
-  // Generate a stable unique ID prefix
   const uniqueIdPrefix = useId();
 
   if (loading) return <div>Loading...</div>;
@@ -44,7 +45,8 @@ export default function AttendeesTable({
                 </div>
                 <DeleteAttendee 
                   id={attendeeItem.id} 
-                  containerId={attendeeItem.classe_id.toString()} 
+                  containerId={attendeeItem.classe_id.toString()}
+                  onDeleted={onAttendeeDeleted}
                 />
               </div>
             </div>
@@ -56,16 +58,10 @@ export default function AttendeesTable({
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Classe
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Class Name
                 </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Date
                 </th>
                 <th scope="col" className="relative px-6 py-3">
@@ -89,7 +85,8 @@ export default function AttendeesTable({
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <DeleteAttendee 
                       id={attendeeItem.id} 
-                      containerId={attendeeItem.classe_id.toString()} 
+                      containerId={attendeeItem.classe_id.toString()}
+                      onDeleted={onAttendeeDeleted}
                     />
                   </td>
                 </tr>
