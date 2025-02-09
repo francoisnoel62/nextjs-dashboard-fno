@@ -1,7 +1,7 @@
 // src/presentation/hooks/useFilteredAttendees.ts
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Attendee } from '@/src/domain/entities/Attendee';
 import { fetchFilteredAttendees } from '@/src/applications/actions/presences/fetchAttendees';
 import { useSearchParams } from 'next/navigation';
@@ -19,8 +19,9 @@ export function useFilteredAttendees(initialAttendees: Attendee[] = []): UseFilt
   const [error, setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
 
-  const fetchAttendeesData = async (query: string, page: number) => {
+  const fetchAttendeesData = useCallback(async (query: string, page: number) => {
     try {
+      setLoading(true);
       const result = await fetchFilteredAttendees(query, page);
       setAttendees(result);
       setError(null);
@@ -30,15 +31,18 @@ export function useFilteredAttendees(initialAttendees: Attendee[] = []): UseFilt
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  // Refetch when search params change
   useEffect(() => {
     const query = searchParams?.get('query') || '';
     const page = Number(searchParams?.get('page')) || 1;
-    setLoading(true);
-    fetchAttendeesData(query, page);
-  }, [searchParams]);
+    
+    const timeoutId = setTimeout(() => {
+      fetchAttendeesData(query, page);
+    }, query ? 300 : 0); // Add debounce only for search queries
+
+    return () => clearTimeout(timeoutId);
+  }, [searchParams, fetchAttendeesData]);
 
   return {
     attendees,

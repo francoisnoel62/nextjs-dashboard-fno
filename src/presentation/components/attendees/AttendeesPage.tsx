@@ -6,10 +6,11 @@ import Pagination from './pagination';
 import Search from '../shared/search';
 import Table from './table';
 import PrintAttendees from './print-attendees';
-import { Suspense, useCallback, useState } from 'react';
+import { Suspense, useCallback } from 'react';
 import { Attendee } from '@/src/domain/entities/Attendee';
 import { useFilteredAttendees } from '../../hooks/useFilteredAttendees';
 import { useGroupedAttendees } from '../../hooks/useGroupedAttendees';
+import { useSearchParams } from 'next/navigation';
 
 interface AttendeesPageProps {
   totalPages: number;
@@ -17,6 +18,7 @@ interface AttendeesPageProps {
   currentPage: number;
   user: { email: string } | null;
   initialAttendees: Attendee[];
+  isAdmin?: boolean;
 }
 
 export default function AttendeesPage({
@@ -25,21 +27,24 @@ export default function AttendeesPage({
   currentPage,
   user,
   initialAttendees,
+  isAdmin = false,
 }: AttendeesPageProps) {
-  const [localAttendees, setLocalAttendees] = useState(initialAttendees);
-  const { attendees, loading, error, fetchAttendees } = useFilteredAttendees(localAttendees);
+  const searchParams = useSearchParams();
+  const { attendees, loading, error, fetchAttendees } = useFilteredAttendees(initialAttendees);
   const groupedAttendees = useGroupedAttendees(attendees);
 
   const handleOptimisticDelete = useCallback((deletedId: number) => {
-    // Update local state immediately
-    setLocalAttendees(current => current.filter(attendee => attendee.id !== deletedId));
-  }, []);
+    fetchAttendees(
+      searchParams.get('query') || '',
+      Number(searchParams.get('page')) || 1
+    );
+  }, [fetchAttendees, searchParams]);
 
   const handleAttendeeDeleted = useCallback(async () => {
-    const query = new URLSearchParams(window.location.search).get('query') || '';
-    const page = Number(new URLSearchParams(window.location.search).get('page')) || 1;
-    await fetchAttendees(query, page);
-  }, [fetchAttendees]);
+    const currentQuery = searchParams.get('query') || '';
+    const currentPage = Number(searchParams.get('page')) || 1;
+    await fetchAttendees(currentQuery, currentPage);
+  }, [fetchAttendees, searchParams]);
 
   return (
     <div className="w-full">
@@ -48,7 +53,7 @@ export default function AttendeesPage({
       </div>
       <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
         <Search placeholder="Search attendees..." />
-        {user?.email === process.env.DZ_EMAIL && <PrintAttendees />}
+        {isAdmin && <PrintAttendees />}
       </div>
       <Suspense key={query + currentPage} fallback={<AttendeesTableSkeleton />}>
         <Table 

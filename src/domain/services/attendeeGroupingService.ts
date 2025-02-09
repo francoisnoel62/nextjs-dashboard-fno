@@ -5,18 +5,23 @@ export type GroupedAttendees = Record<'current' | 'next' | 'future', Attendee[]>
 
 export class AttendeeGroupingService {
   static groupAttendeesByWeek(attendees: Attendee[]): GroupedAttendees {
-    const grouped = attendees.reduce((acc: GroupedAttendees, attendee: Attendee) => {
-      const group = getWeekGroup(attendee.date_et_heure?.toString() ?? '') as 'current' | 'next' | 'future';
+    // Pre-process dates once to avoid repeated string parsing
+    const attendeesWithDates = attendees.map(attendee => ({
+      ...attendee,
+      parsedDate: new Date(attendee.date_et_heure?.toString() ?? '')
+    }));
+
+    // Sort once before grouping
+    attendeesWithDates.sort((a, b) => a.parsedDate.getTime() - b.parsedDate.getTime());
+
+    const grouped = attendeesWithDates.reduce((acc: GroupedAttendees, attendee) => {
+      const group = getWeekGroup(attendee.parsedDate.toString()) as 'current' | 'next' | 'future';
       acc[group] = acc[group] || [];
       acc[group].push(attendee);
       return acc;
     }, { current: [], next: [], future: [] });
 
-    // Sort attendees in each group by date
-    Object.values(grouped).forEach((group) => {
-      group.sort((a, b) => new Date(a.date_et_heure?.toString() ?? '').getTime() - new Date(b.date_et_heure?.toString() ?? '').getTime());
-    });
-
+    // No need to sort again since we pre-sorted
     return grouped;
   }
 }

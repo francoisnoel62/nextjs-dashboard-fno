@@ -37,6 +37,9 @@ export function DeleteAttendee({
         return;
       }
       
+      // Call onDeleted after successful deletion to refresh the data
+      await onDeleted();
+      
     } catch (error) {
       console.error('Error:', error);
       alert('An error occurred while deleting');

@@ -22,6 +22,9 @@ export default async function Page(
 
     // Ensure we only pass a user object with a valid email
     const user = session?.user?.email ? { email: session.user.email } : null;
+    
+    // Check if user is admin on the server side
+    const isAdmin = user?.email === process.env.DZ_EMAIL;
 
     // Pass the data as props to the pure UI component
     return (
@@ -31,6 +34,7 @@ export default async function Page(
             query={query}
             currentPage={currentPage}
             initialAttendees={attendees}
+            isAdmin={isAdmin}
         />
     );
 }
